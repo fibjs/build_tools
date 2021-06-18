@@ -22,7 +22,7 @@ We recommend CMake script-mode as build workflow, that is, instead of bash/sh/cm
 drive your build.
 
 ```CMake
-include(<built_tool_path>/cmake/get_env.cmake)
+include(<built_tool_path>/cmake-scripts/get_env.cmake)
 
 set(WORK_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/output")
 
@@ -44,7 +44,7 @@ else()
 endif()
 ```
 
-As of this script, `build` funciton is defined in  `<built_tool_path>/cmake/get_env.cmake`.
+As of this script, `build` funciton is defined in  `<built_tool_path>/cmake-scripts/get_env.cmake`.
 
 ```CMake
 build(src_dirname, outputpath)
