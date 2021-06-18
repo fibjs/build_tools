@@ -12,7 +12,11 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../../../bin/${CMAKE_HOST_SYSTE
 
 include_directories(${PROJECT_SOURCE_DIR}/../ "${PROJECT_SOURCE_DIR}/../include" "${PROJECT_SOURCE_DIR}/../../")
 
-set(libs ${libname} ${libs})
+if(NOT DEFINED test_libs)
+	message(FATAL_ERROR "[LibraryTest.cmake] test_libs is required!")
+endif()
+
+set(libs ${libname} ${libs} ${test_libs})
 foreach(lib ${libs})
 	target_link_libraries(${name} "${EXECUTABLE_OUTPUT_PATH}/${CMAKE_STATIC_LIBRARY_PREFIX}${lib}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 endforeach()
