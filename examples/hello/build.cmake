@@ -1,4 +1,4 @@
-include(../../cmake/get_env.cmake)
+include(../../cmake-scripts/get_env.cmake)
 
 set(WORK_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/output")
 
