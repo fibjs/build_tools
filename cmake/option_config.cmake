@@ -3,20 +3,16 @@
 function(check_env c_flags)
 	include(CheckIncludeFiles)
 	include(CheckCSourceCompiles)
+    include(CheckCXXSourceCompiles)
 
 	set(CMAKE_C_FLAGS "${c_flags}")
 
 	check_include_files(iconv.h HAVE_ICONV_H)
     set(HAVE_ICONV_H "${HAVE_ICONV_H}" PARENT_SCOPE)
 
-    if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Darwin")
-        check_c_source_compiles("#include <stdatomic.h>
-            atomic_int a;
-            int main(void){atomic_load(&a);return 0;}" HAVE_GLIB_C_ATOMIC_H)
-    else()
-        check_c_source_compiles("#include <atomic>
-            int main(void){std::atomic<int64_t> a;std::atomic_load(&a);return 0;}" HAVE_GLIB_C_ATOMIC_H)
-    endif()
+    check_cxx_source_compiles("#include <atomic>
+        int main(void){std::atomic<double> a;std::atomic_load(&a);return 0;}"
+        HAVE_GLIB_C_ATOMIC_H)
     set(HAVE_GLIB_C_ATOMIC_H ${HAVE_GLIB_C_ATOMIC_H} PARENT_SCOPE)
 
     if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Linux")
