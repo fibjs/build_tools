@@ -20,7 +20,7 @@ function(setup_result_library name)
         endif()
 
         target_link_libraries(${name} pthread)
-        if(NOT HAVE_GLIB_C_ATOMIC_H)
+        if(NOT HAVE_GLIB_C_ATOMIC_H AND NOT ${ARCH} STREQUAL "i386")
             target_link_libraries(${name} atomic)
         endif()
     endif()
