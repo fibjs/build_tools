@@ -91,6 +91,7 @@ elseif(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Darwin")
 	set(link_flags "${link_flags} -framework WebKit -framework Cocoa -framework Carbon -framework IOKit -mmacosx-version-min=10.9")
 
     if(${ARCH} STREQUAL "amd64")
+        set(CMAKE_OSX_ARCHITECTURES "x86_64")
         set(BUILD_OPTION "${BUILD_OPTION} --target=x86_64-apple-darwin")
     elseif(${ARCH} STREQUAL "arm64")
         set(BUILD_OPTION "${BUILD_OPTION} --target=aarch64-apple-darwin")
