@@ -114,7 +114,7 @@ function(gethostarch RETVAL)
     endif()
 endfunction()
 
-function(build src out)
+function(build src out bin)
     file(MAKE_DIRECTORY "${out}")
 
     if(NOT DEFINED BUILD_TYPE)
@@ -136,6 +136,8 @@ function(build src out)
                 -T "v141"
                 -DARCH=${BUILD_ARCH}
                 -DBUILD_TYPE=${BUILD_TYPE}
+                -DLIBRARY_OUTPUT_PATH=${bin}
+                -DEXECUTABLE_OUTPUT_PATH=${bin}
                 -A ${TargetArch}
                 "${src}"
             ENCODING UTF8
@@ -169,6 +171,8 @@ function(build src out)
                 -DCMAKE_CXX_COMPILER=clang++
                 -DARCH=${BUILD_ARCH}
                 -DBUILD_TYPE=${BUILD_TYPE}
+                -DLIBRARY_OUTPUT_PATH=${bin}
+                -DEXECUTABLE_OUTPUT_PATH=${bin}
                 "${src}"
             RESULT_VARIABLE STATUS
             ERROR_VARIABLE BUILD_ERROR
