@@ -124,8 +124,12 @@ function(build src out bin)
     if((${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Windows") AND (NOT "${BUILD_USE_CLANG}" STREQUAL "true"))
         if(${BUILD_ARCH} STREQUAL "amd64")
             set(TargetArch "x64")
-        else()
+        elseif(${BUILD_ARCH} STREQUAL "i386")
             set(TargetArch "Win32")
+        elseif(${BUILD_ARCH} STREQUAL "arm64")
+            set(TargetArch "ARM64")
+        elseif(${BUILD_ARCH} STREQUAL "arm")
+            set(TargetArch "ARM")
         endif()
 
         execute_process(WORKING_DIRECTORY "${out}"
