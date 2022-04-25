@@ -200,11 +200,7 @@ endfunction()
 
 function(prepare_platform)
     if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Windows")
-        # @todo set EnvVar to tell clang use VS2017 rather than newest one if it's not VS2017
-        #
-        # by default, clang/LLVM would find newest VCToolChain, if you install both VS2017 and VS2019
-        # VS2019's VCTools would be used to compile vender, but v8 6.9 cannot be compiled with it, we must
-        # tell clang to use VS2017's VCToolChain
+        # @todo set EnvVar to tell clang use VS2017 rather than newest one if it's not VS2019
         if("$ENV{VCToolsInstallDir}" STREQUAL "")
             if("$ENV{ProgramW6432}" STREQUAL "")
                 set(PROGRAM_FILES_X86 "$ENV{ProgramFiles\(x86\)}")
@@ -216,19 +212,19 @@ function(prepare_platform)
             
             execute_process(
                 WORKING_DIRECTORY "${out}"
-                COMMAND "${PROGRAM_FILES_X86}\\Microsoft\ Visual\ Studio\\Installer\\vswhere.exe" -property installationPath -version "[15.0, 16.0)"
-                OUTPUT_VARIABLE VS2017_INSTALLPATH
+                COMMAND "${PROGRAM_FILES_X86}\\Microsoft\ Visual\ Studio\\Installer\\vswhere.exe" -property installationPath -version "[16.0, 17.0)"
+                OUTPUT_VARIABLE VS_INSTALLPATH
                 OUTPUT_STRIP_TRAILING_WHITESPACE
             )
 
-            if("${VS2017_INSTALLPATH}" STREQUAL "")
+            if("${VS_INSTALLPATH}" STREQUAL "")
                 chalklog("error" "make sure you have installed vs2017 with vcruntime headers/libraries" "[win32]")
             endif()
 
-            file(STRINGS "${VS2017_INSTALLPATH}\\VC\\Auxiliary\\Build\\Microsoft.VCToolsVersion.default.txt" CUR_MSVC_1900_VER)
-            chalklog("success" "CUR_MSVC_1900_VER is ${CUR_MSVC_1900_VER}" "[win32]")
+            file(STRINGS "${VS_INSTALLPATH}\\VC\\Auxiliary\\Build\\Microsoft.VCToolsVersion.default.txt" CUR_MSVC_VER)
+            chalklog("success" "CUR_MSVC_VER is ${CUR_MSVC_VER}" "[win32]")
 
-            set(ENV{VCToolsInstallDir} "${VS2017_INSTALLPATH}\\VC\\Tools\\MSVC\\${CUR_MSVC_1900_VER}")
+            set(ENV{VCToolsInstallDir} "${VS_INSTALLPATH}\\VC\\Tools\\MSVC\\${CUR_MSVC_VER}")
             chalklog("success" "ENV{VCToolsInstallDir} is $ENV{VCToolsInstallDir}" "[win32]")
         endif()
     endif()
