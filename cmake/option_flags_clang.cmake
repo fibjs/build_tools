@@ -87,6 +87,8 @@ elseif(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Windows")
     # keep same name format with Unix
     set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
 
+    set(CMAKE_CXX_STANDARD 14)
+
 	add_definitions(-DWIN32 -D_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_RAND_S -DNOMINMAX)
 	set(flags "${flags} -fms-extensions -fmsc-version=1910 -frtti")
 
@@ -118,7 +120,9 @@ elseif(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Darwin")
     endif()
 endif()
 
-set(CMAKE_CXX_STANDARD 14)
+if("${CMAKE_CXX_STANDARD}" STREQUAL "")
+    set(CMAKE_CXX_STANDARD 11)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(flags "${flags} -fsigned-char -fmessage-length=0 -fdata-sections -ffunction-sections -D_FILE_OFFSET_BITS=64")
