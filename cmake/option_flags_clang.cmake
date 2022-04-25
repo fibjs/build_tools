@@ -69,8 +69,8 @@ if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Linux")
     if(NOT ${HOST_ARCH} STREQUAL ${ARCH})
         set(BUILD_OPTION "${BUILD_OPTION} --target=${BUILD_TARGET} -L/usr/lib/gcc-cross/${BUILD_TARGET}/${GCC_VERSION} -L/usr/${BUILD_TARGET}/lib -I/usr/${BUILD_TARGET}/include -I/usr/${BUILD_TARGET}/include/c++/${GCC_VERSION} -I/usr/${BUILD_TARGET}/include/c++/${GCC_VERSION}/${BUILD_TARGET}")
 
-        set(CMAKE_ASM_TARGET "--target=${BUILD_TARGET}")
-        set(CMAKE_ASM-ATT_TARGET "--target=${BUILD_TARGET}")
+        set(CMAKE_ASM_COMPILER_TARGET "${BUILD_TARGET}")
+        set(CMAKE_ASM-ATT_TARGET "${BUILD_TARGET}")
         set(CMAKE_ASM-ATT_COMPILER "/usr/${BUILD_TARGET}/bin/as")
     endif()
 
@@ -86,8 +86,6 @@ elseif(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Windows")
 
     # keep same name format with Unix
     set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
-
-    set(CMAKE_CXX_STANDARD 14)
 
 	add_definitions(-DWIN32 -D_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_RAND_S -DNOMINMAX)
 	set(flags "${flags} -fms-extensions -fmsc-version=1910 -frtti")
@@ -112,7 +110,7 @@ elseif(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Darwin")
 
     if(NOT ${HOST_ARCH} STREQUAL ${ARCH})
         set(BUILD_OPTION "${BUILD_OPTION} --target=${BUILD_TARGET}")
-        set(CMAKE_ASM_COMPILER_TARGET "--target=${BUILD_TARGET}")
+        set(CMAKE_ASM_COMPILER_TARGET "${BUILD_TARGET}")
     endif()
 	
     if(src_platform_list)
@@ -120,9 +118,7 @@ elseif(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Darwin")
     endif()
 endif()
 
-if("${CMAKE_CXX_STANDARD}" STREQUAL "")
-    set(CMAKE_CXX_STANDARD 11)
-endif()
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(flags "${flags} -fsigned-char -fmessage-length=0 -fdata-sections -ffunction-sections -D_FILE_OFFSET_BITS=64")
