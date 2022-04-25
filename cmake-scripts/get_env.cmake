@@ -132,8 +132,6 @@ function(build src out bin)
             OUTPUT_FILE CMake.log 
             COMMAND ${CMAKE_COMMAND}
                 -Wno-dev
-                -G "Visual Studio 15 2017"
-                -T "v141"
                 -DARCH=${BUILD_ARCH}
                 -DBUILD_TYPE=${BUILD_TYPE}
                 -DLIBRARY_OUTPUT_PATH=${bin}
