@@ -1,59 +1,56 @@
 
+function(check_glibc func ver flag)
+    unset(HAVE_GLIB_C_${func} CACHE)
+    check_c_source_compiles("void ${func}();
+        __asm__(\".symver ${func},${func}@GLIBC_${ver}\");
+        int main(void){${func}();return 0;}" HAVE_GLIB_C_${func})
+    if(${HAVE_GLIB_C_${func}})
+        set(${flag} "${ver}" PARENT_SCOPE)
+    endif()
+endfunction()
+
 # run c code to get some library information(like iconv/glibc) from env
-function(check_env c_flags)
+function(config c_flags)
 	include(CheckIncludeFiles)
 	include(CheckCSourceCompiles)
     include(CheckCXXSourceCompiles)
 
-	set(CMAKE_C_FLAGS "${c_flags}")
-
-	check_include_files(iconv.h HAVE_ICONV_H)
-    set(HAVE_ICONV_H "${HAVE_ICONV_H}" PARENT_SCOPE)
+	set(CMAKE_C_FLAGS "${c_flags} -lm")
 
     check_cxx_source_compiles("#include <atomic>
         int main(void){std::atomic<double> a;std::atomic_load(&a);return 0;}"
         HAVE_GLIB_C_ATOMIC_H)
     set(HAVE_GLIB_C_ATOMIC_H ${HAVE_GLIB_C_ATOMIC_H} PARENT_SCOPE)
 
+	check_include_files(iconv.h HAVE_ICONV_H)
+    set(HAVE_ICONV_H "${HAVE_ICONV_H}")
+
     if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Linux")
-        check_c_source_compiles("void posix_spawnp();
-            __asm__(\".symver posix_spawnp,posix_spawnp@GLIBC_2.2.5\");
-            int main(void){posix_spawnp();return 0;}" HAVE_GLIB_C_225_H)
-        set(HAVE_GLIB_C_225_H ${HAVE_GLIB_C_225_H} PARENT_SCOPE)
+        check_glibc(memcpy 2.2.5 GLIB_C_MEMCPY)
 
-        check_c_source_compiles("void posix_spawnp();
-            __asm__(\".symver posix_spawnp,posix_spawnp@GLIBC_2.2\");
-            int main(void){posix_spawnp();return 0;}" HAVE_GLIB_C_22_H)
-        set(HAVE_GLIB_C_22_H ${HAVE_GLIB_C_22_H} PARENT_SCOPE)
+        check_glibc(fcntl 2.17 GLIB_C_FCNTL)
+        check_glibc(fcntl 2.4 GLIB_C_FCNTL)
+        check_glibc(fcntl 2.2.5 GLIB_C_FCNTL)
+        check_glibc(fcntl 2.0 GLIB_C_FCNTL)
 
-        check_c_source_compiles("void fcntl();
-            __asm__(\".symver fcntl,fcntl@GLIBC_2.2.5\");
-            int main(void){fcntl();return 0;}" HAVE_GLIB_C_FCNTL_225_H)
-        set(HAVE_GLIB_C_FCNTL_225_H ${HAVE_GLIB_C_FCNTL_225_H} PARENT_SCOPE)
+        check_glibc(pow 2.17 GLIB_C_MATH)
+        check_glibc(pow 2.4 GLIB_C_MATH)
+        check_glibc(pow 2.2.5 GLIB_C_MATH)
+        check_glibc(pow 2.0 GLIB_C_MATH)
 
-        check_c_source_compiles("void fcntl();
-            __asm__(\".symver fcntl,fcntl@GLIBC_2.0\");
-            int main(void){fcntl();return 0;}" HAVE_GLIB_C_FCNTL_2_H)
-        set(HAVE_GLIB_C_FCNTL_2_H ${HAVE_GLIB_C_FCNTL_2_H} PARENT_SCOPE)
+        check_glibc(clock_gettime 2.4 GLIB_C_TIME)
+        check_glibc(clock_gettime 2.2.5 GLIB_C_TIME)
+        check_glibc(clock_gettime 2.2 GLIB_C_TIME)
+    endif()
 
-        check_c_source_compiles("void fcntl();
-            __asm__(\".symver fcntl,fcntl@GLIBC_2.4\");
-            int main(void){fcntl();return 0;}" HAVE_GLIB_C_FCNTL_24_H)
-        set(HAVE_GLIB_C_FCNTL_24_H ${HAVE_GLIB_C_FCNTL_24_H} PARENT_SCOPE)
-
-        check_c_source_compiles("void fcntl();
-            __asm__(\".symver fcntl,fcntl@GLIBC_2.17\");
-            int main(void){fcntl();return 0;}" HAVE_GLIB_C_FCNTL_217_H)
-        set(HAVE_GLIB_C_FCNTL_217_H ${HAVE_GLIB_C_FCNTL_217_H} PARENT_SCOPE)
+    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tools/config.h.in)
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tools/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
     endif()
 endfunction()
 
-check_env("${BUILD_OPTION}")
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tools/config.h.in)
-	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tools/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-endif()
+config("${BUILD_OPTION}")
 
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tools/config.h.in)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tools/gitinfo.h.in)
 	execute_process(WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 		COMMAND git describe --tags --always
 		OUTPUT_VARIABLE GIT_INFO
