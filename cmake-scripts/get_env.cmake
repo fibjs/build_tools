@@ -198,6 +198,22 @@ function(build src out bin)
     endif()
 endfunction()
 
+function(find_vs v1 v2)
+    while(v1 LESS v2 AND "${VS_INSTALLPATH}" STREQUAL "")
+        MATH(EXPR v3 "${v2}-1")
+
+        execute_process(
+            WORKING_DIRECTORY "${out}"
+            COMMAND "${PROGRAM_FILES_X86}\\Microsoft\ Visual\ Studio\\Installer\\vswhere.exe" -property installationPath -version "[${v3}.0, ${v2}.0)"
+            OUTPUT_VARIABLE VS_INSTALLPATH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+
+        set(v2 "${v3}")
+    endwhile()
+    set(VS_INSTALLPATH ${VS_INSTALLPATH} PARENT_SCOPE)
+endfunction()
+
 function(prepare_platform)
     if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Windows")
         # @todo set EnvVar to tell clang use VS2017 rather than newest one if it's not VS2019
@@ -210,15 +226,10 @@ function(prepare_platform)
 
             chalklog("success" "PROGRAM_FILES_X86 is ${PROGRAM_FILES_X86}" "[win32]")
             
-            execute_process(
-                WORKING_DIRECTORY "${out}"
-                COMMAND "${PROGRAM_FILES_X86}\\Microsoft\ Visual\ Studio\\Installer\\vswhere.exe" -property installationPath -version "[16.0, 17.0)"
-                OUTPUT_VARIABLE VS_INSTALLPATH
-                OUTPUT_STRIP_TRAILING_WHITESPACE
-            )
+            find_vs(15, 18)
 
             if("${VS_INSTALLPATH}" STREQUAL "")
-                chalklog("error" "make sure you have installed vs2017 with vcruntime headers/libraries" "[win32]")
+                chalklog("error" "make sure you have installed vs.net with vcruntime headers/libraries" "[win32]")
             endif()
 
             file(STRINGS "${VS_INSTALLPATH}\\VC\\Auxiliary\\Build\\Microsoft.VCToolsVersion.default.txt" CUR_MSVC_VER)
