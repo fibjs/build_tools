@@ -10,7 +10,9 @@ SUDO_LOCATION=$( command -v sudo )
 if [[ $OS == "Linux" ]]; then
     [[ ! -e /etc/os-release ]] && echo " - /etc/os-release not found! It seems you're attempting to use an unsupported Linux distribution." && exit 1
     . /etc/os-release
-elif [[ $OS == "Darwin" ]]; then export NAME=$(sw_vers -productName)
+elif [[ $OS == "Darwin" ]]; then
+    export NAME=$(sw_vers -productName)
+    BREW_PATH=$( brew --prefix )
 fi
 
 APTGET=apt
@@ -70,7 +72,7 @@ function install_package() {
     # Can't use $SUDO_COMMAND: https://askubuntu.com/questions/953485/where-do-i-find-the-sudo-command-environment-variable
     [[ $CURRENT_USER != "root" ]] && [[ ! -z $SUDO_LOCATION ]] && NEW_SUDO_COMMAND="$SUDO_LOCATION -E"
     ( [[ $NAME =~ "Amazon Linux" ]] || [[ $NAME =~ "CentOS" ]] || [[ $NAME =~ "Fedora" ]] ) && eval $EXECUTION_FUNCTION $NEW_SUDO_COMMAND $YUM $OPTIONS install -y $1
-    ( [[ $NAME =~ "Ubuntu" ]] ) && eval $EXECUTION_FUNCTION $NEW_SUDO_COMMAND $APTGET $OPTIONS install -y $1
+    ( [[ $NAME =~ "Ubuntu" ]] || [[ $NAME =~ "Debian" ]] ) && eval $EXECUTION_FUNCTION $NEW_SUDO_COMMAND $APTGET $OPTIONS install -y $1
   fi
   true # Required; Weird behavior without it
 }
@@ -172,7 +174,7 @@ function ensure_brew_packages() {
     OLDIFS="$IFS"; IFS=$','
     # || [[ -n "$nmae" ]]; needed to see last line of deps file (https://stackoverflow.com/questions/12916352/shell-script-read-missing-last-line)
     while read -r name path || [[ -n "$name" ]]; do
-        if [[ -f $path ]] || [[ -d $path ]]; then
+        if [[ -f $BREW_PATH/$path ]] || [[ -d $BREW_PATH/$path ]]; then
             echo " - ${name} ${COLOR_GREEN}ok${COLOR_NC}"
             continue
         fi
