@@ -67,7 +67,7 @@ if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Linux")
     endif()
 
     if(NOT ${HOST_ARCH} STREQUAL ${ARCH})
-        if("${CMAKE_C_COMPILER}" STREQUAL "clang")
+        if("${CMAKE_C_COMPILER}" STREQUAL "/usr/bin/clang")
             set(BUILD_OPTION "${BUILD_OPTION} --target=${BUILD_TARGET} -L/usr/lib/gcc-cross/${BUILD_TARGET}/${GCC_VERSION} -L/usr/${BUILD_TARGET}/lib -I/usr/${BUILD_TARGET}/include -I/usr/${BUILD_TARGET}/include/c++/${GCC_VERSION} -I/usr/${BUILD_TARGET}/include/c++/${GCC_VERSION}/${BUILD_TARGET}")
         endif()
 
