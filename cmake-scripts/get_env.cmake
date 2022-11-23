@@ -163,14 +163,19 @@ function(build src out bin)
             ERROR_VARIABLE BUILD_ERROR
         )
     else()
+        if("$ENV{CC}" STREQUAL "")
+            set(ENV{CC} "clang")
+            set(ENV{CXX} "clang++")
+        endif()
+
         execute_process(WORKING_DIRECTORY "${out}"
             OUTPUT_FILE CMake.log 
             COMMAND ${CMAKE_COMMAND}
                 -Wno-dev
                 -DCMAKE_MAKE_PROGRAM=make
                 -G "Unix Makefiles"
-                -DCMAKE_C_COMPILER=clang
-                -DCMAKE_CXX_COMPILER=clang++
+                -DCMAKE_C_COMPILER=$ENV{CC}
+                -DCMAKE_CXX_COMPILER=$ENV{CXX}
                 -DARCH=${BUILD_ARCH}
                 -DBUILD_TYPE=${BUILD_TYPE}
                 -DLIBRARY_OUTPUT_PATH=${bin}

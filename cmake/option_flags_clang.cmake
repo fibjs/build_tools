@@ -67,7 +67,9 @@ if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Linux")
     endif()
 
     if(NOT ${HOST_ARCH} STREQUAL ${ARCH})
-        set(BUILD_OPTION "${BUILD_OPTION} --target=${BUILD_TARGET} -L/usr/lib/gcc-cross/${BUILD_TARGET}/${GCC_VERSION} -L/usr/${BUILD_TARGET}/lib -I/usr/${BUILD_TARGET}/include -I/usr/${BUILD_TARGET}/include/c++/${GCC_VERSION} -I/usr/${BUILD_TARGET}/include/c++/${GCC_VERSION}/${BUILD_TARGET}")
+        if("${CMAKE_C_COMPILER}" STREQUAL "clang")
+            set(BUILD_OPTION "${BUILD_OPTION} --target=${BUILD_TARGET} -L/usr/lib/gcc-cross/${BUILD_TARGET}/${GCC_VERSION} -L/usr/${BUILD_TARGET}/lib -I/usr/${BUILD_TARGET}/include -I/usr/${BUILD_TARGET}/include/c++/${GCC_VERSION} -I/usr/${BUILD_TARGET}/include/c++/${GCC_VERSION}/${BUILD_TARGET}")
+        endif()
 
         set(CMAKE_ASM_COMPILER_TARGET "${BUILD_TARGET}")
         set(CMAKE_ASM-ATT_TARGET "${BUILD_TARGET}")
