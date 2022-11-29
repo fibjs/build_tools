@@ -22,8 +22,10 @@ function(config c_flags)
         HAVE_GLIB_C_ATOMIC_H)
     set(HAVE_GLIB_C_ATOMIC_H ${HAVE_GLIB_C_ATOMIC_H} PARENT_SCOPE)
 
-	check_include_files(iconv.h HAVE_ICONV_H)
-    set(HAVE_ICONV_H "${HAVE_ICONV_H}")
+    if(NOT ANDROID)
+        check_include_files(iconv.h HAVE_ICONV_H)
+        set(HAVE_ICONV_H "${HAVE_ICONV_H}")
+    endif()
 
     if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Linux")
         check_glibc(memcpy 2.2.5 GLIB_C_MEMCPY)

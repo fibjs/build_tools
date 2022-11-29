@@ -114,8 +114,11 @@ function(gethostarch RETVAL)
     endif()
 endfunction()
 
-function(build src out bin)
-    file(MAKE_DIRECTORY "${out}")
+function(build src out name)
+    set(OUT_PATH "${out}/out/${DIST_DIRNAME}/${name}")
+    set(BIN_PATH "${out}/bin/${DIST_DIRNAME}")
+
+    file(MAKE_DIRECTORY "${OUT_PATH}")
 
     if(NOT DEFINED BUILD_TYPE)
         message(FATAL_ERROR "[get_env::build] BUILD_TYPE haven't been set, check your input.")
@@ -132,14 +135,14 @@ function(build src out bin)
             set(TargetArch "ARM")
         endif()
 
-        execute_process(WORKING_DIRECTORY "${out}"
+        execute_process(WORKING_DIRECTORY "${OUT_PATH}"
             OUTPUT_FILE CMake.log 
             COMMAND ${CMAKE_COMMAND}
                 -Wno-dev
                 -DARCH=${BUILD_ARCH}
                 -DBUILD_TYPE=${BUILD_TYPE}
-                -DLIBRARY_OUTPUT_PATH=${bin}
-                -DEXECUTABLE_OUTPUT_PATH=${bin}
+                -DLIBRARY_OUTPUT_PATH=${BIN_PATH}
+                -DEXECUTABLE_OUTPUT_PATH=${BIN_PATH}
                 -A ${TargetArch}
                 "${src}"
             ENCODING UTF8
@@ -148,11 +151,11 @@ function(build src out bin)
         )
 
         if(STATUS AND NOT STATUS EQUAL 0)
-            message("[get_env::build::error::cmake] for '${out}'")
+            message("[get_env::build::error::cmake] for '${OUT_PATH}'")
             message(FATAL_ERROR "${BUILD_ERROR}")
         endif()
 
-        execute_process(WORKING_DIRECTORY "${out}"
+        execute_process(WORKING_DIRECTORY "${OUT_PATH}"
             COMMAND ${CMAKE_COMMAND} 
             --build ./
             --config ${BUILD_TYPE}
@@ -163,12 +166,7 @@ function(build src out bin)
             ERROR_VARIABLE BUILD_ERROR
         )
     else()
-        if("$ENV{CC}" STREQUAL "")
-            set(ENV{CC} "clang")
-            set(ENV{CXX} "clang++")
-        endif()
-
-        execute_process(WORKING_DIRECTORY "${out}"
+        execute_process(WORKING_DIRECTORY "${OUT_PATH}"
             OUTPUT_FILE CMake.log 
             COMMAND ${CMAKE_COMMAND}
                 -Wno-dev
@@ -178,19 +176,19 @@ function(build src out bin)
                 -DCMAKE_CXX_COMPILER=$ENV{CXX}
                 -DARCH=${BUILD_ARCH}
                 -DBUILD_TYPE=${BUILD_TYPE}
-                -DLIBRARY_OUTPUT_PATH=${bin}
-                -DEXECUTABLE_OUTPUT_PATH=${bin}
+                -DLIBRARY_OUTPUT_PATH=${BIN_PATH}
+                -DEXECUTABLE_OUTPUT_PATH=${BIN_PATH}
                 "${src}"
             RESULT_VARIABLE STATUS
             ERROR_VARIABLE BUILD_ERROR
         )
 
         if(STATUS AND NOT STATUS EQUAL 0)
-            message("[get_env::build::error::cmake] for '${out}'")
+            message("[get_env::build::error::cmake] for '${OUT_PATH}'")
             message(FATAL_ERROR "${BUILD_ERROR}")
         endif()
         
-        execute_process(WORKING_DIRECTORY "${out}"
+        execute_process(WORKING_DIRECTORY "${OUT_PATH}"
             COMMAND ${CMAKE_COMMAND} --build . -- -j${BUILD_JOBS}
             RESULT_VARIABLE STATUS
             ERROR_VARIABLE BUILD_ERROR
@@ -198,7 +196,7 @@ function(build src out bin)
     endif()
 
     if(STATUS AND NOT STATUS EQUAL 0)
-        message("[get_env::build::error::make] for '${out}'")
+        message("[get_env::build::error::make] for '${OUT_PATH}'")
         message(FATAL_ERROR "${BUILD_ERROR}")
     endif()
 endfunction()
@@ -261,13 +259,37 @@ include(ProcessorCount)
 
 prepare_platform()
 gethostarch(HOST_ARCH)
+
+set(BUILD_OS ${CMAKE_HOST_SYSTEM_NAME})
+
 if(NOT DEFINED BUILD_ARCH OR "${BUILD_ARCH}" STREQUAL "")
     set(BUILD_ARCH ${HOST_ARCH})
+endif()
+
+if("$ENV{CC}" STREQUAL "")
+    set(ENV{CC} "clang")
+    set(ENV{CXX} "clang++")
+else()
+    execute_process(
+        COMMAND bash -c "$ENV{CC} -dM -E - </dev/null"
+        OUTPUT_VARIABLE GCC_DEFINES
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    if(${GCC_DEFINES} MATCHES "__aarch64__")
+        set(BUILD_ARCH "arm64")
+    endif()
+
+    if(${GCC_DEFINES} MATCHES "__ANDROID__")
+        set(BUILD_OS "Android")
+    endif()
 endif()
 
 if("${BUILD_TYPE}" STREQUAL "")
     set(BUILD_TYPE release)
 endif()
+
+set(DIST_DIRNAME "${BUILD_OS}_${BUILD_ARCH}_${BUILD_TYPE}")
 
 if("${BUILD_JOBS}" STREQUAL "")
     ProcessorCount(CMAKE_HOST_SYSTEM_PROCESSOR_COUNT)
@@ -279,6 +301,7 @@ set(ENV{CLICOLOR_FORCE} 1)
 message("")
 message("HOST_OS is ${CMAKE_HOST_SYSTEM_NAME}")
 message("HOST_ARCH is ${HOST_ARCH}")
+message("BUILD_OS is ${BUILD_OS}")
 message("BUILD_ARCH is ${BUILD_ARCH}")
 message("BUILD_TYPE is ${BUILD_TYPE}")
 message("BUILD_JOBS is ${BUILD_JOBS}")
