@@ -27,7 +27,7 @@ function(config c_flags)
         set(HAVE_ICONV_H "${HAVE_ICONV_H}")
     endif()
 
-    if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Linux")
+    if("${BUILD_OS}" STREQUAL "Linux")
         check_glibc(memcpy 2.2.5 GLIB_C_MEMCPY)
 
         check_glibc(fcntl 2.17 GLIB_C_FCNTL)

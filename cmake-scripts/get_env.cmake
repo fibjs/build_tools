@@ -124,7 +124,7 @@ function(build src out name)
         message(FATAL_ERROR "[get_env::build] BUILD_TYPE haven't been set, check your input.")
     endif()
 
-    if((${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Windows") AND (NOT "${BUILD_USE_CLANG}" STREQUAL "true"))
+    if(("${BUILD_OS}" STREQUAL "Windows") AND (NOT "${BUILD_USE_CLANG}" STREQUAL "true"))
         if(${BUILD_ARCH} STREQUAL "amd64")
             set(TargetArch "x64")
         elseif(${BUILD_ARCH} STREQUAL "i386")
@@ -139,6 +139,7 @@ function(build src out name)
             OUTPUT_FILE CMake.log 
             COMMAND ${CMAKE_COMMAND}
                 -Wno-dev
+                -DBUILD_OS=${BUILD_OS}
                 -DARCH=${BUILD_ARCH}
                 -DBUILD_TYPE=${BUILD_TYPE}
                 -DLIBRARY_OUTPUT_PATH=${BIN_PATH}
@@ -174,6 +175,7 @@ function(build src out name)
                 -G "Unix Makefiles"
                 -DCMAKE_C_COMPILER=$ENV{CC}
                 -DCMAKE_CXX_COMPILER=$ENV{CXX}
+                -DBUILD_OS=${BUILD_OS}
                 -DARCH=${BUILD_ARCH}
                 -DBUILD_TYPE=${BUILD_TYPE}
                 -DLIBRARY_OUTPUT_PATH=${BIN_PATH}
@@ -271,17 +273,35 @@ if("$ENV{CC}" STREQUAL "")
     set(ENV{CXX} "clang++")
 else()
     execute_process(
-        COMMAND bash -c "$ENV{CC} -dM -E - </dev/null"
-        OUTPUT_VARIABLE GCC_DEFINES
+        COMMAND $ENV{CC} $ENV{CFLAGS} -dumpmachine
+        OUTPUT_VARIABLE CC_TARGET
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
-    if(${GCC_DEFINES} MATCHES "__aarch64__")
+    message("target: ${CC_TARGET}")
+
+    if(${CC_TARGET} MATCHES "(x86_64)|(amd64)")
+        set(BUILD_ARCH "amd64")
+    elseif(${CC_TARGET} MATCHES "(i386)|(i686)")
+        set(BUILD_ARCH "i386")
+    elseif(${CC_TARGET} MATCHES "(aarch64)|(arm64)")
         set(BUILD_ARCH "arm64")
+    elseif(${CC_TARGET} MATCHES "arm")
+        set(BUILD_ARCH "arm")
+    elseif(${CC_TARGET} MATCHES "mips64")
+        set(BUILD_ARCH "mips64")
+    elseif(${CC_TARGET} MATCHES "mips")
+        set(BUILD_ARCH "mips")
+    elseif(${CC_TARGET} MATCHES "ppc64")
+        set(BUILD_ARCH "ppc64")
+    elseif(${CC_TARGET} MATCHES "powerpc")
+        set(BUILD_ARCH "ppc")
     endif()
 
-    if(${GCC_DEFINES} MATCHES "__ANDROID__")
+    if(${CC_TARGET} MATCHES "android")
         set(BUILD_OS "Android")
+    elseif(${CC_TARGET} MATCHES "mingw")
+        set(BUILD_OS "Windows")
     endif()
 endif()
 

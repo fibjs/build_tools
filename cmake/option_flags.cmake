@@ -1,7 +1,7 @@
 # get host's architecture in cmake script mode
 function(gethostarch RETVAL)
     if("${${RETVAL}}" STREQUAL "")
-        if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Windows")
+        if("${BUILD_OS}" STREQUAL "Windows")
             set(HOST_SYSTEM_PROCESSOR amd64)
         else()
             execute_process(
