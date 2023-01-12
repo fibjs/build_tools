@@ -151,7 +151,7 @@ function(build src out name)
         )
 
         if(NOT STATUS EQUAL 0)
-            exit(STATUS)
+            message(FATAL_ERROR "[build] exit code: ${STATUS}")
         endif()
 
         execute_process(WORKING_DIRECTORY "${OUT_PATH}"
@@ -167,10 +167,6 @@ function(build src out name)
             OUTPUT_FILE CMake.log 
             COMMAND ${CMAKE_COMMAND}
                 -Wno-dev
-                -DCMAKE_MAKE_PROGRAM=make
-                -G "Unix Makefiles"
-                -DCMAKE_C_COMPILER=$ENV{CC}
-                -DCMAKE_CXX_COMPILER=$ENV{CXX}
                 -DBUILD_OS=${BUILD_OS}
                 -DARCH=${BUILD_ARCH}
                 -DBUILD_TYPE=${BUILD_TYPE}
@@ -180,7 +176,7 @@ function(build src out name)
         )
 
         if(NOT STATUS EQUAL 0)
-            exit(STATUS)
+            message(FATAL_ERROR "[build] exit code: ${STATUS}")
         endif()
         
         execute_process(WORKING_DIRECTORY "${OUT_PATH}"
@@ -190,7 +186,7 @@ function(build src out name)
     endif()
 
     if(NOT STATUS EQUAL 0)
-        exit(STATUS)
+        message(FATAL_ERROR "[build] exit code: ${STATUS}")
     endif()
 endfunction()
 
@@ -259,44 +255,7 @@ if(NOT DEFINED BUILD_ARCH OR "${BUILD_ARCH}" STREQUAL "")
     set(BUILD_ARCH ${HOST_ARCH})
 endif()
 
-if("$ENV{CC}" STREQUAL "")
-    set(ENV{CC} "clang")
-    set(ENV{CXX} "clang++")
-else()
-    execute_process(
-        COMMAND $ENV{CC} $ENV{CFLAGS} -dumpmachine
-        OUTPUT_VARIABLE CC_TARGET
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-
-    message("target: ${CC_TARGET}")
-
-    if(${CC_TARGET} MATCHES "(x86_64)|(amd64)")
-        set(BUILD_ARCH "amd64")
-    elseif(${CC_TARGET} MATCHES "(i386)|(i686)")
-        set(BUILD_ARCH "i386")
-    elseif(${CC_TARGET} MATCHES "(aarch64)|(arm64)")
-        set(BUILD_ARCH "arm64")
-    elseif(${CC_TARGET} MATCHES "arm")
-        set(BUILD_ARCH "arm")
-    elseif(${CC_TARGET} MATCHES "mips64")
-        set(BUILD_ARCH "mips64")
-    elseif(${CC_TARGET} MATCHES "ppc64")
-        set(BUILD_ARCH "ppc64")
-    elseif(${CC_TARGET} MATCHES "s390x")
-        set(BUILD_ARCH "s390x")
-    elseif(${CC_TARGET} MATCHES "riscv64")
-        set(BUILD_ARCH "riscv64")
-    elseif(${CC_TARGET} MATCHES "loongarch64")
-        set(BUILD_ARCH "loong64")
-    endif()
-
-    if(${CC_TARGET} MATCHES "android")
-        set(BUILD_OS "Android")
-    elseif(${CC_TARGET} MATCHES "mingw")
-        set(BUILD_OS "Windows")
-    endif()
-endif()
+include(${CMAKE_CURRENT_LIST_DIR}/get_compiler.cmake)
 
 if("${BUILD_TYPE}" STREQUAL "")
     set(BUILD_TYPE release)
