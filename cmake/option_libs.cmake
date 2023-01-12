@@ -1,3 +1,6 @@
+set(LIBRARY_OUTPUT_PATH "${BIN_PATH}")
+set(EXECUTABLE_OUTPUT_PATH "${BIN_PATH}")
+
 function(setup_result_library name)
     if("${BUILD_OS}" STREQUAL "Windows")
         target_link_libraries(${name} winmm ws2_32 psapi dbghelp shlwapi urlmon

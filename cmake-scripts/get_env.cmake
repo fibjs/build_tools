@@ -144,18 +144,14 @@ function(build src out name)
                 -DBUILD_OS=${BUILD_OS}
                 -DARCH=${BUILD_ARCH}
                 -DBUILD_TYPE=${BUILD_TYPE}
-                -DLIBRARY_OUTPUT_PATH=${BIN_PATH}
-                -DEXECUTABLE_OUTPUT_PATH=${BIN_PATH}
+                -DBIN_PATH=${BIN_PATH}
                 -A ${TargetArch}
                 "${src}"
-            ENCODING UTF8
             RESULT_VARIABLE STATUS
-            ERROR_VARIABLE BUILD_ERROR
         )
 
-        if(STATUS AND NOT STATUS EQUAL 0)
-            message("[get_env::build::error::cmake] for '${OUT_PATH}'")
-            message(FATAL_ERROR "${BUILD_ERROR}")
+        if(NOT STATUS EQUAL 0)
+            exit(STATUS)
         endif()
 
         execute_process(WORKING_DIRECTORY "${OUT_PATH}"
@@ -164,9 +160,7 @@ function(build src out name)
             --config ${BUILD_TYPE}
             -- /nologo /verbosity:minimal
             /p:CL_MPcount=${BUILD_JOBS}
-            ENCODING UTF8
             RESULT_VARIABLE STATUS
-            ERROR_VARIABLE BUILD_ERROR
         )
     else()
         execute_process(WORKING_DIRECTORY "${OUT_PATH}"
@@ -180,28 +174,23 @@ function(build src out name)
                 -DBUILD_OS=${BUILD_OS}
                 -DARCH=${BUILD_ARCH}
                 -DBUILD_TYPE=${BUILD_TYPE}
-                -DLIBRARY_OUTPUT_PATH=${BIN_PATH}
-                -DEXECUTABLE_OUTPUT_PATH=${BIN_PATH}
+                -DBIN_PATH=${BIN_PATH}
                 "${src}"
             RESULT_VARIABLE STATUS
-            ERROR_VARIABLE BUILD_ERROR
         )
 
-        if(STATUS AND NOT STATUS EQUAL 0)
-            message("[get_env::build::error::cmake] for '${OUT_PATH}'")
-            message(FATAL_ERROR "${BUILD_ERROR}")
+        if(NOT STATUS EQUAL 0)
+            exit(STATUS)
         endif()
         
         execute_process(WORKING_DIRECTORY "${OUT_PATH}"
             COMMAND ${CMAKE_COMMAND} --build . -- -j${BUILD_JOBS}
             RESULT_VARIABLE STATUS
-            ERROR_VARIABLE BUILD_ERROR
         )
     endif()
 
-    if(STATUS AND NOT STATUS EQUAL 0)
-        message("[get_env::build::error::make] for '${OUT_PATH}'")
-        message(FATAL_ERROR "${BUILD_ERROR}")
+    if(NOT STATUS EQUAL 0)
+        exit(STATUS)
     endif()
 endfunction()
 

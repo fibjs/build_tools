@@ -16,7 +16,7 @@ endif()
 
 set(libs ${libname} ${libs} ${test_libs})
 foreach(lib ${libs})
-	target_link_libraries(${name} "${EXECUTABLE_OUTPUT_PATH}/${CMAKE_STATIC_LIBRARY_PREFIX}${lib}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+	target_link_libraries(${name} "${BIN_PATH}/${CMAKE_STATIC_LIBRARY_PREFIX}${lib}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 endforeach()
 
 setup_result_library(${name})

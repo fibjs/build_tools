@@ -35,14 +35,11 @@ macro(fixup_CMAKE_BUILD_TYPE)
 endmacro()
 
 if("${BUILD_OS}" STREQUAL "Linux")
-    message("[Linux] HOST_ARCH is ${HOST_ARCH}, TARGET_ARCH is ${ARCH}")
-
     execute_process(
         COMMAND gcc -dumpversion
         OUTPUT_VARIABLE GCC_VERSION
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-    message("[Linux] GCC_VERSION is ${GCC_VERSION}")
 
     if(NOT ${HOST_ARCH} STREQUAL ${ARCH} AND "${CMAKE_C_COMPILER}" STREQUAL "/usr/bin/clang")
         if(${ARCH} STREQUAL "amd64")
@@ -110,6 +107,8 @@ elseif("${BUILD_OS}" STREQUAL "Darwin")
         set(BUILD_OPTION "${BUILD_OPTION} --target=${BUILD_TARGET}")
         set(CMAKE_ASM_COMPILER_TARGET "${BUILD_TARGET}")
     endif()
+
+    set(CMAKE_ASM_FLAGS "-mmacosx-version-min=10.13")
 	
     if(src_platform_list)
 	    set_source_files_properties(${src_platform_list} PROPERTIES COMPILE_FLAGS "-x objective-c++")
@@ -139,7 +138,7 @@ if(${BUILD_TYPE} STREQUAL "release")
 		set(link_flags "${link_flags} ${link_flags} -static-libgcc")
 	endif()
 elseif(${BUILD_TYPE} STREQUAL "debug")
-	set(flags "${flags} -g -O0 ${BUILD_OPTION} -Wall -Wno-overloaded-virtual")
+	set(flags "${flags} -g -O0 ${BUILD_OPTION} -Wall -Wno-overloaded-virtual -Wno-unused-function -Wno-extern-c-compat")
 	set(link_flags "${link_flags} ${BUILD_OPTION}")
 	add_definitions(-DDEBUG=1)
 
