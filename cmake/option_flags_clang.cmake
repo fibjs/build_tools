@@ -123,18 +123,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(flags "${flags} -fsigned-char -fmessage-length=0 -fdata-sections -ffunction-sections -D_FILE_OFFSET_BITS=64")
 
 if(${BUILD_TYPE} STREQUAL "release")
-	set(flags "${flags} -O3 -s ${BUILD_OPTION} -w -fomit-frame-pointer -fvisibility=hidden")
-
-	if("${BUILD_OS}" STREQUAL "FreeBSD")
-		set(flags "${flags} -fno-omit-frame-pointer")
-	else()
-		set(flags "${flags} -fomit-frame-pointer")
-	endif()
+	set(flags "${flags} -O3 -s ${BUILD_OPTION} -w -fvisibility=hidden")
 
 	set(link_flags "${link_flags} ${BUILD_OPTION} -static-libstdc++")
 	add_definitions(-DNDEBUG=1)
 
-	if("${BUILD_OS}" STREQUAL "Linux")
+	if(NOT "${BUILD_OS}" STREQUAL "Darwin")
 		set(link_flags "${link_flags} ${link_flags} -static-libgcc")
 	endif()
 elseif(${BUILD_TYPE} STREQUAL "debug")
