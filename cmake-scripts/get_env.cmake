@@ -251,10 +251,6 @@ gethostarch(HOST_ARCH)
 
 set(BUILD_OS ${CMAKE_HOST_SYSTEM_NAME})
 
-if(NOT DEFINED BUILD_ARCH OR "${BUILD_ARCH}" STREQUAL "")
-    set(BUILD_ARCH ${HOST_ARCH})
-endif()
-
 include(${CMAKE_CURRENT_LIST_DIR}/get_compiler.cmake)
 
 if("${BUILD_TYPE}" STREQUAL "")
