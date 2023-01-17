@@ -249,7 +249,11 @@ include(ProcessorCount)
 prepare_platform()
 gethostarch(HOST_ARCH)
 
-set(BUILD_OS ${CMAKE_HOST_SYSTEM_NAME})
+if("${BUILD_OS}" STREQUAL "iphone")
+    set(BUILD_OS "iPhone")
+else()
+    set(BUILD_OS ${CMAKE_HOST_SYSTEM_NAME})
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/get_compiler.cmake)
 

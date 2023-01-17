@@ -12,7 +12,7 @@ function(setup_result_library name)
             RUNTIME_OUTPUT_DIRECTORY_RELEASE "${EXECUTABLE_OUTPUT_PATH}"
             RUNTIME_OUTPUT_DIRECTORY_DEBUG "${EXECUTABLE_OUTPUT_PATH}"
         )
-    elseif("${BUILD_OS}" STREQUAL "Darwin")
+    elseif("${BUILD_OS}" STREQUAL "Darwin" OR "${BUILD_OS}" STREQUAL "iPhone")
         target_link_libraries(${name} dl iconv stdc++ pthread)
     elseif("${BUILD_OS}" STREQUAL "FreeBSD")
         find_library(execinfo execinfo "/usr/local/lib" "/usr/lib")

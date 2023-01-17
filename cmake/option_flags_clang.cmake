@@ -91,28 +91,52 @@ elseif("${BUILD_OS}" STREQUAL "Windows")
     elseif(${BUILD_TYPE} STREQUAL "release")
         set(flags "${flags} -Xclang --dependent-lib=libcmt")
     endif()
+elseif("${BUILD_OS}" STREQUAL "iPhone")
+    execute_process(
+        COMMAND xcrun --sdk iphoneos --show-sdk-path
+        OUTPUT_VARIABLE OSX_SYSROOT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    set(flags "${flags} -Wno-nullability-completeness -miphoneos-version-min=11.0 -isysroot ${OSX_SYSROOT}")
+    set(link_flags "${link_flags} -miphoneos-version-min=11.0 -isysroot ${OSX_SYSROOT}")
+
+    if(${ARCH} STREQUAL "arm64")
+        set(CMAKE_OSX_ARCHITECTURES "arm64")
+        set(BUILD_TARGET "aarch64-apple-ios")
+    else()
+        message(FATAL_ERROR "Unsupported target architecture {${ARCH}}.")
+    endif()
+
+    set(BUILD_OPTION "${BUILD_OPTION} --target=${BUILD_TARGET}")
+    set(CMAKE_ASM_COMPILER_TARGET "${BUILD_TARGET}")
+
+    set(CMAKE_ASM_FLAGS "-miphoneos-version-min=11.0 -isysroot ${OSX_SYSROOT}")
+
+    if(src_platform_list)
+        set_source_files_properties(${src_platform_list} PROPERTIES COMPILE_FLAGS "-x objective-c++")
+    endif()
 elseif("${BUILD_OS}" STREQUAL "Darwin")
-	set(flags "${flags} -Wno-nullability-completeness -mmacosx-version-min=10.13 -DOBJC_OLD_DISPATCH_PROTOTYPES=1")
-	set(link_flags "${link_flags} -framework WebKit -framework Cocoa -framework Carbon -framework IOKit -mmacosx-version-min=10.13")
+    set(flags "${flags} -Wno-nullability-completeness -mmacosx-version-min=10.13")
+    set(link_flags "${link_flags} -mmacosx-version-min=10.13")
 
     if(${ARCH} STREQUAL "amd64")
         set(CMAKE_OSX_ARCHITECTURES "x86_64")
         set(BUILD_TARGET "x86_64-apple-darwin")
     elseif(${ARCH} STREQUAL "arm64")
+        set(CMAKE_OSX_ARCHITECTURES "arm64")
         set(BUILD_TARGET "aarch64-apple-darwin")
     else()
         message(FATAL_ERROR "Unsupported target architecture {${ARCH}}.")
     endif()
 
-    if(NOT ${HOST_ARCH} STREQUAL ${ARCH})
-        set(BUILD_OPTION "${BUILD_OPTION} --target=${BUILD_TARGET}")
-        set(CMAKE_ASM_COMPILER_TARGET "${BUILD_TARGET}")
-    endif()
+    set(BUILD_OPTION "${BUILD_OPTION} --target=${BUILD_TARGET}")
+    set(CMAKE_ASM_COMPILER_TARGET "${BUILD_TARGET}")
 
     set(CMAKE_ASM_FLAGS "-mmacosx-version-min=10.13")
-	
+
     if(src_platform_list)
-	    set_source_files_properties(${src_platform_list} PROPERTIES COMPILE_FLAGS "-x objective-c++")
+        set_source_files_properties(${src_platform_list} PROPERTIES COMPILE_FLAGS "-x objective-c++")
     endif()
 endif()
 
@@ -129,7 +153,7 @@ if(${BUILD_TYPE} STREQUAL "release")
 	set(link_flags "${link_flags} ${BUILD_OPTION} -static-libstdc++")
 	add_definitions(-DNDEBUG=1)
 
-	if(NOT "${BUILD_OS}" STREQUAL "Darwin")
+	if(NOT "${BUILD_OS}" STREQUAL "Darwin" AND NOT "${BUILD_OS}" STREQUAL "iPhone")
 		set(link_flags "${link_flags} ${link_flags} -static-libgcc")
 	endif()
 elseif(${BUILD_TYPE} STREQUAL "debug")
