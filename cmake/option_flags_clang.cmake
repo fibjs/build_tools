@@ -118,7 +118,7 @@ elseif("${BUILD_OS}" STREQUAL "iPhone")
     endif()
 elseif("${BUILD_OS}" STREQUAL "Darwin")
     set(flags "${flags} -Wno-nullability-completeness -mmacosx-version-min=10.13")
-    set(link_flags "${link_flags} -mmacosx-version-min=10.13")
+    set(link_flags "${link_flags} -framework WebKit -framework Cocoa -mmacosx-version-min=10.13")
 
     if(${ARCH} STREQUAL "amd64")
         set(CMAKE_OSX_ARCHITECTURES "x86_64")
