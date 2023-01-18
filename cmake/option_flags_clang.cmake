@@ -34,13 +34,11 @@ macro(fixup_CMAKE_BUILD_TYPE)
     endif()
 endmacro()
 
-if("${BUILD_OS}" STREQUAL "Linux")
-    execute_process(
-        COMMAND gcc -dumpversion
-        OUTPUT_VARIABLE GCC_VERSION
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-
+if("${BUILD_OS}" STREQUAL "Alpine")
+    if(${ARCH} STREQUAL "arm")
+        set(BUILD_OPTION "${BUILD_OPTION} -march=armv7-a -mfpu=vfp3 -marm")
+    endif()
+elseif("${BUILD_OS}" STREQUAL "Linux")
     if(NOT ${HOST_ARCH} STREQUAL ${ARCH} AND "${CMAKE_C_COMPILER}" STREQUAL "/usr/bin/clang")
         if(${ARCH} STREQUAL "amd64")
             set(BUILD_TARGET "x86_64-linux-gnu")
@@ -63,6 +61,12 @@ if("${BUILD_OS}" STREQUAL "Linux")
             message(FATAL_ERROR "Unsupported target architecture {${ARCH}}.")
         endif()
 
+        execute_process(
+            COMMAND gcc -dumpversion
+            OUTPUT_VARIABLE GCC_VERSION
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    
         set(BUILD_OPTION "${BUILD_OPTION} --target=${BUILD_TARGET} -I/usr/${BUILD_TARGET}/include -I/usr/${BUILD_TARGET}/include/c++/${GCC_VERSION} -I/usr/${BUILD_TARGET}/include/c++/${GCC_VERSION}/${BUILD_TARGET}")
         set(link_flags "${link_flags} ${BUILD_OPTION}  -L/usr/lib/gcc-cross/${BUILD_TARGET}/${GCC_VERSION} -L/usr/${BUILD_TARGET}/lib")
 
