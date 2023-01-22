@@ -23,7 +23,9 @@ macro(configure_msvc_mp)
 
     foreach(variable ${variables})
         # enforce multiple core processing
-        set(${variable} "${${variable}} /MP" CACHE STRING "MSVC_${variable}" FORCE)
+        if(NOT ${variable} MATCHES "/MD")
+            set(${variable} "${${variable}} /MP" CACHE STRING "MSVC_${variable}" FORCE)
+        endif()
     endforeach()
 endmacro()
 
