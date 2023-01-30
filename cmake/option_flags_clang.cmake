@@ -98,12 +98,12 @@ elseif("${BUILD_OS}" STREQUAL "Windows")
 elseif("${BUILD_OS}" STREQUAL "iPhone")
     execute_process(
         COMMAND xcrun --sdk iphoneos --show-sdk-path
-        OUTPUT_VARIABLE OSX_SYSROOT
+        OUTPUT_VARIABLE CMAKE_OSX_SYSROOT
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
-    set(flags "${flags} -Wno-nullability-completeness -miphoneos-version-min=11.0 -isysroot ${OSX_SYSROOT}")
-    set(link_flags "${link_flags} -miphoneos-version-min=11.0 -isysroot ${OSX_SYSROOT}")
+    set(flags "${flags} -Wno-nullability-completeness -miphoneos-version-min=11.0")
+    set(link_flags "${link_flags} -miphoneos-version-min=11.0")
 
     if(${ARCH} STREQUAL "arm64")
         set(CMAKE_OSX_ARCHITECTURES "arm64")
@@ -115,7 +115,7 @@ elseif("${BUILD_OS}" STREQUAL "iPhone")
     set(BUILD_OPTION "${BUILD_OPTION} --target=${BUILD_TARGET}")
     set(CMAKE_ASM_COMPILER_TARGET "${BUILD_TARGET}")
 
-    set(CMAKE_ASM_FLAGS "-miphoneos-version-min=11.0 -isysroot ${OSX_SYSROOT}")
+    set(CMAKE_ASM_FLAGS "-miphoneos-version-min=11.0")
 
     if(src_platform_list)
         set_source_files_properties(${src_platform_list} PROPERTIES COMPILE_FLAGS "-x objective-c++")
