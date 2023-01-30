@@ -10,12 +10,12 @@ function(check_glibc func ver flag)
 endfunction()
 
 # run c code to get some library information(like iconv/glibc) from env
-function(config c_flags)
+function(config)
 	include(CheckIncludeFiles)
 	include(CheckCSourceCompiles)
     include(CheckCXXSourceCompiles)
 
-	set(CMAKE_C_FLAGS "${c_flags} -lm")
+	set(CMAKE_C_FLAGS "${flags} -lm")
 
     check_cxx_source_compiles("#include <atomic>
         int main(void){std::atomic<double> a;std::atomic_load(&a);return 0;}"
@@ -50,7 +50,7 @@ function(config c_flags)
     endif()
 endfunction()
 
-config("${BUILD_OPTION}")
+config()
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tools/gitinfo.h.in)
 	execute_process(WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"

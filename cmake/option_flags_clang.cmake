@@ -140,7 +140,8 @@ elseif("${BUILD_OS}" STREQUAL "Darwin")
     set(CMAKE_ASM_FLAGS "-mmacosx-version-min=10.13")
 
     if(src_platform_list)
-        set_source_files_properties(${src_platform_list} PROPERTIES COMPILE_FLAGS "-x objective-c++")
+        enable_language(OBJCXX)
+        set(CMAKE_OBJCXX_COMPILER /usr/bin/clang++)
     endif()
 endif()
 

@@ -39,10 +39,6 @@ if(NOT DEFINED flags)
     set(flags "")
 endif()
 
-if(NOT DEFINED cflags)
-    set(cflags "")
-endif()
-
 if(NOT DEFINED ccflags)
     set(ccflags "")
 endif()
@@ -61,5 +57,6 @@ else()
 	include(${CMAKE_CURRENT_LIST_DIR}/option_flags_clang.cmake)
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${flags} ${cflags}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${flags}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flags} ${ccflags}")
+set(CMAKE_OBJCXX_FLAGS "${CMAKE_OBJCXX_FLAGS} ${flags} ${ccflags}")
