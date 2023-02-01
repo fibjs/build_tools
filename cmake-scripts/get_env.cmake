@@ -218,10 +218,10 @@ function(prepare_platform)
 
             chalklog("success" "PROGRAM_FILES_X86 is ${PROGRAM_FILES_X86}" "[win32]")
             
-            find_vs(15, 18)
+            find_vs(16, 18)
 
-            if("${VS_INSTALLPATH}" STREQUAL "")
-                chalklog("error" "make sure you have installed vs.net with vcruntime headers/libraries" "[win32]")
+            if("${VS_INSTALLPATH}" STREQUAL "" OR NOT EXISTS "${VS_INSTALLPATH}\\VC")
+                chalklog("error" "make sure you have installed vs.net with vc runtime\n" "[win32]")
             endif()
 
             file(STRINGS "${VS_INSTALLPATH}\\VC\\Auxiliary\\Build\\Microsoft.VCToolsVersion.default.txt" CUR_MSVC_VER)
