@@ -37,6 +37,10 @@ function(config)
             check_glibc(clock_gettime GLIB_C_TIME)
         endif()
 
+        if(${ARCH} STREQUAL "arm")
+            check_glibc(clock_gettime GLIB_C_TIME)
+        endif()
+
         check_glibc(fcntl GLIB_C_FCNTL)
         check_glibc(pow GLIB_C_MATH)
     endif()
