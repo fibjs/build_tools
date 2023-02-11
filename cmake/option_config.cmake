@@ -32,10 +32,13 @@ function(config)
     endif()
 
     if("${BUILD_OS}" STREQUAL "Linux")
-        check_glibc(memcpy GLIB_C_MEMCPY)
+        if(${ARCH} MATCHES "i386|amd64")
+            check_glibc(memcpy GLIB_C_MEMCPY)
+            check_glibc(clock_gettime GLIB_C_TIME)
+        endif()
+
         check_glibc(fcntl GLIB_C_FCNTL)
         check_glibc(pow GLIB_C_MATH)
-        check_glibc(clock_gettime GLIB_C_TIME)
     endif()
 
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tools/config.h.in)
