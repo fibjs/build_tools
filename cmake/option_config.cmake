@@ -42,7 +42,10 @@ function(config)
         endif()
 
         check_glibc(fcntl GLIB_C_FCNTL)
-        check_glibc(pow GLIB_C_MATH)
+
+        if(NOT ${ARCH} STREQUAL "loong64")
+            check_glibc(pow GLIB_C_MATH)
+        endif()
     endif()
 
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tools/config.h.in)
