@@ -1,16 +1,25 @@
 
-function(check_glibc func flag)
-    set(vers 2.27 2.17 2.4 2.2.5 2.2 2.0)
+function(check_glibc func next flag)
+    set(vers 2.29 2.28 2.27 2.17 2.14 2.4 2.2.5 2.2 2.0)
 
     foreach(ver ${vers})
         unset(HAVE_GLIB_C_${func} CACHE)
         check_c_source_compiles("void ${func}();
             __asm__(\".symver ${func},${func}@GLIBC_${ver}\");
             int main(void){${func}();return 0;}" HAVE_GLIB_C_${func})
+
         if(${HAVE_GLIB_C_${func}})
-            set(${flag} "${ver}" PARENT_SCOPE)
+            if("${next}" STREQUAL "no")
+                set(next yes)
+            else()
+                set(found "${ver}")
+            endif()
         endif()
     endforeach()
+
+    if(NOT "${found}" STREQUAL "")
+        set(${flag} "${found}" PARENT_SCOPE)
+    endif()
 endfunction()
 
 # run c code to get some library information(like iconv/glibc) from env
@@ -32,20 +41,11 @@ function(config)
     endif()
 
     if("${BUILD_OS}" STREQUAL "Linux")
-        if(${ARCH} MATCHES "i386|amd64")
-            check_glibc(memcpy GLIB_C_MEMCPY)
-            check_glibc(clock_gettime GLIB_C_TIME)
-        endif()
+        check_glibc(memcpy no GLIB_C_MEMCPY)
+        check_glibc(clock_gettime no GLIB_C_TIME)
+        check_glibc(pow no GLIB_C_MATH)
 
-        if(${ARCH} STREQUAL "arm")
-            check_glibc(clock_gettime GLIB_C_TIME)
-        endif()
-
-        check_glibc(fcntl GLIB_C_FCNTL)
-
-        if(NOT ${ARCH} STREQUAL "loong64")
-            check_glibc(pow GLIB_C_MATH)
-        endif()
+        check_glibc(fcntl yes GLIB_C_FCNTL)
     endif()
 
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tools/config.h.in)
