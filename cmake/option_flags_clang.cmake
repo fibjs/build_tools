@@ -165,6 +165,11 @@ if(${BUILD_TYPE} STREQUAL "release")
 	endif()
 elseif(${BUILD_TYPE} STREQUAL "debug")
 	set(flags "${flags} -g1 -O0 ${BUILD_OPTION}")
+
+    if(${ARCH} STREQUAL "mips64")
+        set(flags "${flags} -mxgot")
+    endif()
+
     if("$ENV{CI}" STREQUAL "")
         set(flags "${flags} -Wall -Wno-unused-function")
     else()
