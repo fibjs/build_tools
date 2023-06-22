@@ -150,7 +150,7 @@ if("${CMAKE_CXX_STANDARD}" STREQUAL "")
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(flags "${flags} -fPIC -fsigned-char -fmessage-length=0 -fdata-sections -ffunction-sections -D_FILE_OFFSET_BITS=64")
+set(flags "${flags} -fPIC -fsigned-char -fmessage-length=0 -fdata-sections -ffunction-sections")
 
 if(${BUILD_TYPE} STREQUAL "release")
 	set(flags "${flags} -O3 -s ${BUILD_OPTION} -w -fvisibility=hidden")
