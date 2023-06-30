@@ -34,11 +34,6 @@ set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
 
 add_definitions(-DWIN32 -D_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_RAND_S -DNOMINMAX)
 
-if("${CMAKE_CXX_STANDARD}" STREQUAL "")
-    set(CMAKE_CXX_STANDARD 17)
-endif()
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(flags "${flags} /utf-8")
 
 configure_msvc_mp()

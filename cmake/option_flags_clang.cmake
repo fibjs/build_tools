@@ -145,11 +145,6 @@ elseif("${BUILD_OS}" STREQUAL "Darwin")
     endif()
 endif()
 
-if("${CMAKE_CXX_STANDARD}" STREQUAL "")
-    set(CMAKE_CXX_STANDARD 17)
-endif()
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(flags "${flags} -fPIC -fsigned-char -fmessage-length=0 -fdata-sections -ffunction-sections")
 
 if(${BUILD_TYPE} STREQUAL "release")
