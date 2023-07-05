@@ -96,16 +96,25 @@ elseif("${BUILD_OS}" STREQUAL "Windows")
         set(flags "${flags} -Xclang --dependent-lib=libcmt")
     endif()
 elseif("${BUILD_OS}" STREQUAL "iPhone")
-    execute_process(
-        COMMAND xcrun --sdk iphoneos --show-sdk-path
-        OUTPUT_VARIABLE CMAKE_OSX_SYSROOT
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-
     set(flags "${flags} -Wno-nullability-completeness -miphoneos-version-min=12.0")
     set(link_flags "${link_flags} -miphoneos-version-min=12.0")
 
-    if(${ARCH} STREQUAL "arm64")
+    if(${ARCH} STREQUAL "amd64")
+        execute_process(
+            COMMAND xcrun --sdk iphonesimulator --show-sdk-path
+            OUTPUT_VARIABLE CMAKE_OSX_SYSROOT
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+
+        set(CMAKE_OSX_ARCHITECTURES "x86_64")
+        set(BUILD_TARGET "x86_64-apple-ios-simulator")
+    elseif(${ARCH} STREQUAL "arm64")
+        execute_process(
+            COMMAND xcrun --sdk iphoneos --show-sdk-path
+            OUTPUT_VARIABLE CMAKE_OSX_SYSROOT
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+
         set(CMAKE_OSX_ARCHITECTURES "arm64")
         set(BUILD_TARGET "aarch64-apple-ios")
     else()
