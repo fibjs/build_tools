@@ -44,6 +44,7 @@ function(config)
         check_glibc(memcpy no GLIB_C_MEMCPY)
         check_glibc(clock_gettime no GLIB_C_TIME)
         check_glibc(pow no GLIB_C_MATH)
+        check_glibc(log2 no GLIB_C_MATH2)
 
         check_glibc(fcntl yes GLIB_C_FCNTL)
     endif()
