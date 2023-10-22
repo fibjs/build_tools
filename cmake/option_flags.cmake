@@ -2,7 +2,7 @@
 function(gethostarch RETVAL)
     if("${${RETVAL}}" STREQUAL "")
         if("${BUILD_OS}" STREQUAL "Windows")
-            set(HOST_SYSTEM_PROCESSOR amd64)
+            set(HOST_SYSTEM_PROCESSOR x64)
         else()
             execute_process(
                 COMMAND uname -m
@@ -12,9 +12,9 @@ function(gethostarch RETVAL)
         endif()
 
         if(${HOST_SYSTEM_PROCESSOR} MATCHES "^(i386)|(i686)|(x86)$")
-            set(${RETVAL} i386 PARENT_SCOPE)
+            set(${RETVAL} x86 PARENT_SCOPE)
         elseif(${HOST_SYSTEM_PROCESSOR} MATCHES "^(x86_64)|(amd64)|(AMD64)$")
-            set(${RETVAL} amd64 PARENT_SCOPE)
+            set(${RETVAL} x64 PARENT_SCOPE)
         elseif(${HOST_SYSTEM_PROCESSOR} MATCHES "^(armv7)|(armv7s)|(armv7l)$")
             set(${RETVAL} arm PARENT_SCOPE)
         elseif(${HOST_SYSTEM_PROCESSOR} MATCHES "^(aarch64)|(arm64)$")

@@ -7,13 +7,13 @@ set ARG_ERROR=no
 for %%a in (%*) do (
     set ARG_ERROR=yes
 
-    if "%%a"=="amd64" (
-    	set BUILD_ARCH=amd64
+    if "%%a"=="x64" (
+    	set BUILD_ARCH=x64
         set ARG_ERROR=no
     )
 
-    if "%%a"=="i386" (
-    	set BUILD_ARCH=i386
+    if "%%a"=="x86" (
+    	set BUILD_ARCH=x86
         set ARG_ERROR=no
     )
 
@@ -61,7 +61,7 @@ goto finished
 	echo Options:
 	echo   release, debug: 
 	echo       Specifies the build type.
-	echo   i386, amd64, arm64:
+	echo   x86, x64, arm64:
 	echo       Specifies the architecture for code generation.
 	echo   clean: 
 	echo       Clean the build folder.

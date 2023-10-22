@@ -77,7 +77,7 @@ include(<built_tool_path>/cmake/LibraryTest.cmake)
 ### Run CMake
 
 ```bash
-cmake -DBUILD_ARCH=amd64\
+cmake -DBUILD_ARCH=x64\
     -DBUILD_TYPE=release\
     -DCLEAN_BUILD=""\
     -DBUILD_JOBS=4\

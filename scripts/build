@@ -7,7 +7,7 @@ usage()
 	echo "Options:"
 	echo "  release, debug: "
 	echo "      Specifies the build type."
-	echo "  i386, amd64, arm, arm64, mips64, ppc64, s390x, riscv64:"
+	echo "  x86, x64, arm, arm64, mips64, ppc64, s390x, riscv64:"
 	echo "      Specifies the architecture for code generation."
 	echo "  android, alpine, linux, iphone:"
 	echo "      Specifies the target platform."
@@ -27,7 +27,7 @@ usage()
 for i in "$@"
 do
     case $i in
-        i386|amd64|arm|arm64|mips64|ppc64|s390x|riscv64|loong64) BUILD_ARCH=$i
+        x86|x64|arm|arm64|mips64|ppc64|s390x|riscv64|loong64) BUILD_ARCH=$i
             ;;
         alpine|android|linux|iphone) BUILD_OS=$i
             ;;
