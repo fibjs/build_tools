@@ -10,7 +10,7 @@ args=$@
 for i in $@
 do
 	case $i in
-		i386|amd64|arm|arm64|mips64|ppc64|s390x|riscv64|loong64) BUILD_ARCH=$i
+		x86|x64|arm|arm64|mips64|ppc64|s390x|riscv64|loong64) BUILD_ARCH=$i
 			;;
 		linux|alpine|android) BUILD_OS=$i
 			args="${args/$BUILD_OS/}" 
@@ -20,7 +20,7 @@ done
 
 if [[ $BUILD_OS ]]; then
 	if [[ "${BUILD_ARCH}" == "" ]]; then
-		BUILD_ARCH=amd64
+		BUILD_ARCH=x64
 	fi
 
 	USER_ID=`id -u ${USER}`
