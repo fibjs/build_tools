@@ -25,7 +25,8 @@ if [[ $BUILD_OS ]]; then
 
 	USER_ID=`id -u ${USER}`
 
-	docker run -ti --rm -v ${WORK_ROOT}:${WORK_ROOT} fibjs/${BUILD_OS}-build-env:${BUILD_ARCH} \
+    if [ -t 1 ] ; then DOCKER_TTY='ti'; else DOCKER_TTY='i'; fi
+	docker run -${DOCKER_TTY} --rm -v ${WORK_ROOT}:${WORK_ROOT} fibjs/${BUILD_OS}-build-env:${BUILD_ARCH} \
 		bash -c "cd ${WORK_ROOT} && usermod -u ${USER_ID} fibjs && groupmod -g ${USER_ID} fibjs && sudo -E -u fibjs bash build ${args}"
 	exit $?
 fi
