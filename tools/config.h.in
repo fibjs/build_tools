@@ -1,0 +1,8 @@
+
+
+#cmakedefine HAVE_ICONV_H 1
+
+#cmakedefine GLIB_C_MEMCPY "${GLIB_C_MEMCPY}"
+#cmakedefine GLIB_C_FCNTL "${GLIB_C_FCNTL}"
+#cmakedefine GLIB_C_MATH "${GLIB_C_MATH}"
+#cmakedefine GLIB_C_TIME "${GLIB_C_TIME}"

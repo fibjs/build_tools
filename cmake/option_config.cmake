@@ -49,18 +49,14 @@ function(config)
         check_glibc(fcntl yes GLIB_C_FCNTL)
     endif()
 
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tools/config.h.in)
-        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tools/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-    endif()
+    configure_file(${CMAKE_CURRENT_LIST_DIR}/../tools/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 endfunction()
 
 config()
 
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tools/gitinfo.h.in)
-	execute_process(WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-		COMMAND git describe --tags --always
-		OUTPUT_VARIABLE GIT_INFO
-		OUTPUT_STRIP_TRAILING_WHITESPACE
-	)
-	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tools/gitinfo.h.in ${CMAKE_CURRENT_BINARY_DIR}/gitinfo.h)
-endif()
+execute_process(WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMAND git describe --tags --always
+    OUTPUT_VARIABLE GIT_INFO
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+configure_file(${CMAKE_CURRENT_LIST_DIR}/../tools/gitinfo.h.in ${CMAKE_CURRENT_BINARY_DIR}/gitinfo.h)
