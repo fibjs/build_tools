@@ -1,9 +1,9 @@
 #!/bin/bash
 
-WORK_ROOT=$(dirname "$0")
-export WORK_ROOT="`( cd \"$WORK_ROOT\" && pwd )`"
-
-echo "WORK_ROOT: ${WORK_ROOT}"
+if [[ "$WORK_ROOT" == "" ]]; then
+    WORK_ROOT=$(dirname "$0")
+    export WORK_ROOT="`( cd \"$WORK_ROOT\" && pwd )`"
+fi
 
 args=$@
 
