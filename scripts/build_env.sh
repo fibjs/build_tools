@@ -1,43 +1,5 @@
 #!/bin/bash
 
-if [[ "$WORK_ROOT" == "" ]]; then
-    WORK_ROOT=$(dirname "$0")
-    export WORK_ROOT="`( cd \"$WORK_ROOT\" && pwd )`"
-fi
-
-args=$@
-
-for i in $@
-do
-	case $i in
-		x86|x64|arm|arm64|mips64|ppc64|s390x|riscv64|loong64) BUILD_ARCH=$i
-			;;
-		linux|alpine|android) BUILD_OS=$i
-			args="${args/$BUILD_OS/}" 
-			;;
-	esac
-done
-
-if [[ $BUILD_OS ]]; then
-	if [[ "${BUILD_ARCH}" == "" ]]; then
-		BUILD_ARCH=x64
-	fi
-
-	USER_ID=`id -u ${USER}`
-
-    if [ -t 1 ] ; then DOCKER_TTY='ti'; else DOCKER_TTY='i'; fi
-	docker run -${DOCKER_TTY} --rm -v ${WORK_ROOT}:${WORK_ROOT} fibjs/${BUILD_OS}-build-env:${BUILD_ARCH} \
-		bash -c "cd ${WORK_ROOT} && usermod -u ${USER_ID} fibjs && groupmod -g ${USER_ID} fibjs && sudo -E -u fibjs bash build ${args}"
-	exit $?
-fi
-
-TEMP_DIR=${WORK_ROOT}/out
-if [ ! -e "${TEMP_DIR}" ]; then
-	mkdir "${TEMP_DIR}"
-fi
-
-# ===============================================================
-
 # Arrays should return with newlines so we can do something like "${output##*$'\n'}" to get the last line
 IFS=$'\n'
 
@@ -311,14 +273,50 @@ function ensure_apt_packages() {
 
 # ===============================================================
 
-if [[ $CC == "" ]]; then
-	if [[ $OS == "Darwin" ]]; then
-		ensure_brew_packages "${WORK_ROOT}/tools/darwin_deps"
-	elif [[ $OS == "Linux" ]]; then
-		if [[ $NAME =~ "Ubuntu" ]] || [[ $NAME =~ "Debian" ]]; then
-			ensure_apt_packages "${WORK_ROOT}/tools/ubuntu_deps"
-		elif [[ $NAME =~ "CentOS" ]] || [[ $NAME =~ "Fedora" ]]; then
-			ensure_yum_packages "${WORK_ROOT}/tools/centos_deps"
-		fi
-	fi
+if [[ "$WORK_ROOT" == "" ]]; then
+    WORK_ROOT=$(dirname "$0")
+    export WORK_ROOT="`( cd \"$WORK_ROOT\" && pwd )`"
+
+    args=$@
+
+    for i in $@
+    do
+        case $i in
+            x86|x64|arm|arm64|mips64|ppc64|s390x|riscv64|loong64) BUILD_ARCH=$i
+                ;;
+            linux|alpine|android) BUILD_OS=$i
+                args="${args/$BUILD_OS/}" 
+                ;;
+        esac
+    done
+
+    if [[ $BUILD_OS ]]; then
+        if [[ "${BUILD_ARCH}" == "" ]]; then
+            BUILD_ARCH=x64
+        fi
+
+        USER_ID=`id -u ${USER}`
+
+        if [ -t 1 ] ; then DOCKER_TTY='ti'; else DOCKER_TTY='i'; fi
+        docker run -${DOCKER_TTY} --rm -v ${WORK_ROOT}:${WORK_ROOT} fibjs/${BUILD_OS}-build-env:${BUILD_ARCH} \
+            bash -c "cd ${WORK_ROOT} && usermod -u ${USER_ID} fibjs && groupmod -g ${USER_ID} fibjs && sudo -E -u fibjs bash build ${args}"
+        exit $?
+    fi
+
+    TEMP_DIR=${WORK_ROOT}/out
+    if [ ! -e "${TEMP_DIR}" ]; then
+        mkdir "${TEMP_DIR}"
+    fi
+
+    if [[ $CC == "" ]]; then
+        if [[ $OS == "Darwin" ]]; then
+            ensure_brew_packages "${WORK_ROOT}/tools/darwin_deps"
+        elif [[ $OS == "Linux" ]]; then
+            if [[ $NAME =~ "Ubuntu" ]] || [[ $NAME =~ "Debian" ]]; then
+                ensure_apt_packages "${WORK_ROOT}/tools/ubuntu_deps"
+            elif [[ $NAME =~ "CentOS" ]] || [[ $NAME =~ "Fedora" ]]; then
+                ensure_yum_packages "${WORK_ROOT}/tools/centos_deps"
+            fi
+        fi
+    fi
 fi
