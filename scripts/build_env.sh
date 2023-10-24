@@ -282,7 +282,7 @@ if [[ "$WORK_ROOT" == "" ]]; then
     for i in $@
     do
         case $i in
-            x86|x64|arm|arm64|mips64|ppc64|s390x|riscv64|loong64) BUILD_ARCH=$i
+            ia32|x64|arm|arm64|mips64|ppc64|s390x|riscv64|loong64) BUILD_ARCH=$i
                 ;;
             linux|alpine|android) BUILD_OS=$i
                 args="${args/$BUILD_OS/}" 

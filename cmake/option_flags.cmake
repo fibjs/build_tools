@@ -12,7 +12,7 @@ function(gethostarch RETVAL)
         endif()
 
         if(${HOST_SYSTEM_PROCESSOR} MATCHES "^(i386)|(i686)|(x86)$")
-            set(${RETVAL} x86 PARENT_SCOPE)
+            set(${RETVAL} ia32 PARENT_SCOPE)
         elseif(${HOST_SYSTEM_PROCESSOR} MATCHES "^(x86_64)|(amd64)|(AMD64)$")
             set(${RETVAL} x64 PARENT_SCOPE)
         elseif(${HOST_SYSTEM_PROCESSOR} MATCHES "^(armv7)|(armv7s)|(armv7l)$")
