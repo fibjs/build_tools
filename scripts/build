@@ -29,7 +29,7 @@ do
     case $i in
         ia32|x64|arm|arm64|mips64|ppc64|s390x|riscv64|loong64) BUILD_ARCH=$i
             ;;
-        alpine|android|linux|iphone) BUILD_OS=$i
+        alpine|android|linux|iphone|darwin|win32) BUILD_OS=$i
             ;;
         release|debug) BUILD_TYPE=$i
             ;;
