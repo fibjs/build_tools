@@ -284,13 +284,13 @@ if [[ "$WORK_ROOT" == "" ]]; then
         case $i in
             ia32|x64|arm|arm64|mips64|ppc64|s390x|riscv64|loong64) BUILD_ARCH=$i
                 ;;
-            linux|alpine|android) BUILD_OS=$i
-                args="${args/$BUILD_OS/}" 
+            linux|alpine|android) BUILD_DOCKER=$i
+                args="${args/$BUILD_DOCKER/}" 
                 ;;
         esac
     done
 
-    if [[ $BUILD_OS ]]; then
+    if [[ $BUILD_DOCKER ]]; then
         if [[ "${BUILD_ARCH}" == "" ]]; then
             BUILD_ARCH=x64
         fi
@@ -298,7 +298,7 @@ if [[ "$WORK_ROOT" == "" ]]; then
         USER_ID=`id -u ${USER}`
 
         if [ -t 1 ] ; then DOCKER_TTY='ti'; else DOCKER_TTY='i'; fi
-        docker run -${DOCKER_TTY} --rm -v ${WORK_ROOT}:${WORK_ROOT} fibjs/${BUILD_OS}-build-env:${BUILD_ARCH} \
+        docker run -${DOCKER_TTY} --rm -v ${WORK_ROOT}:${WORK_ROOT} fibjs/${BUILD_DOCKER}-build-env:${BUILD_ARCH} \
             bash -c "cd ${WORK_ROOT} && usermod -u ${USER_ID} fibjs && groupmod -g ${USER_ID} fibjs && sudo -E -u fibjs bash build ${args}"
         exit $?
     fi
