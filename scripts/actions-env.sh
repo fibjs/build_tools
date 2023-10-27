@@ -45,6 +45,7 @@ BUILD_TARGET="win32";
 fi
 
 BUILD_TAG=`git tag --contains HEAD`
+COMMIT_ID=`git show -s --format="%cd-%h" --date=format:%Y%m%d%H%M%S HEAD`
 
 echo "BUILD_NAME=${BUILD_NAME}" >> $GITHUB_ENV
 echo "HOST_OS=${HOST_OS}" >> $GITHUB_ENV
@@ -52,3 +53,4 @@ echo "BUILD_TARGET=${BUILD_TARGET}" >> $GITHUB_ENV
 echo "BUILD_ARCH=${BUILD_ARCH}" >> $GITHUB_ENV
 echo "BUILD_TYPE=${BUILD_TYPE}" >> $GITHUB_ENV
 echo "BUILD_TAG=${BUILD_TAG}" >> $GITHUB_ENV
+echo "COMMIT_ID=${COMMIT_ID}" >> $GITHUB_ENV
