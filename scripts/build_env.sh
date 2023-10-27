@@ -311,7 +311,7 @@ function ensure_apt_packages() {
 
 if [[ "$WORK_ROOT" == "" ]]; then
     WORK_ROOT=$(dirname "$0")
-    export WORK_ROOT="$( (cd \"$WORK_ROOT\" && pwd))"
+    export WORK_ROOT=$(cd $WORK_ROOT && pwd)
 
     args=$@
 
