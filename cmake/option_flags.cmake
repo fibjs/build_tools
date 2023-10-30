@@ -33,6 +33,10 @@ function(gethostarch RETVAL)
     endif()
 endfunction()
 
+if("${BUILD_OS}" STREQUAL "")
+    set(BUILD_OS ${CMAKE_HOST_SYSTEM_NAME})
+endif()
+
 gethostarch(HOST_ARCH)
 
 if(NOT DEFINED flags)
@@ -48,7 +52,7 @@ if(NOT DEFINED link_flags)
 endif()
 
 if("${BUILD_ARCH}" STREQUAL "")
-    message(FATAL_ERROR "Unsupported target architecture {${BUILD_ARCH}}.")
+    set(BUILD_ARCH ${HOST_ARCH})
 endif()
 
 if(MSVC)
