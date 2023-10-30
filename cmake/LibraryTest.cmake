@@ -20,7 +20,3 @@ foreach(lib ${libs})
 endforeach()
 
 setup_result_library(${name})
-
-if(link_flags)
-	set_target_properties(${name} PROPERTIES LINK_FLAGS ${link_flags})
-endif()

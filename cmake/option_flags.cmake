@@ -66,6 +66,7 @@ if("${CMAKE_CXX_STANDARD}" STREQUAL "")
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${flags}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flags} ${ccflags}")
-set(CMAKE_OBJCXX_FLAGS "${CMAKE_OBJCXX_FLAGS} ${flags} ${ccflags}")
+set(CMAKE_C_FLAGS "${flags}")
+set(CMAKE_CXX_FLAGS "${flags} ${ccflags}")
+set(CMAKE_OBJCXX_FLAGS "${flags} ${ccflags}")
+

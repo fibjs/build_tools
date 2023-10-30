@@ -9,7 +9,7 @@ set(EXECUTABLE_OUTPUT_PATH "${BIN_PATH}")
 function(setup_result_library name)
     if("${BUILD_OS}" STREQUAL "Windows")
         target_link_libraries(${name} winmm ws2_32 psapi dbghelp shlwapi urlmon
-            userenv advapi32 kernel32 iphlpapi)
+            userenv advapi32 kernel32 iphlpapi comctl32)
 
         set_target_properties(${name} PROPERTIES
             ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${LIBRARY_OUTPUT_PATH}"
@@ -31,4 +31,6 @@ function(setup_result_library name)
             target_link_libraries(${name} atomic)
         endif()
     endif()
+
+	set_target_properties(${name} PROPERTIES LINK_FLAGS "${link_flags}")
 endfunction()
