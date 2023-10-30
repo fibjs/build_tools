@@ -18,7 +18,7 @@ function(setup_result_library name)
             RUNTIME_OUTPUT_DIRECTORY_DEBUG "${EXECUTABLE_OUTPUT_PATH}"
         )
     elseif("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Darwin")
-        target_link_libraries(${name} dl iconv stdc++ pthread)
+        target_link_libraries(${name} dl iconv pthread)
     elseif("${BUILD_OS}" STREQUAL "FreeBSD")
         find_library(execinfo execinfo "/usr/local/lib" "/usr/lib")
         target_link_libraries(${name} ${execinfo} pthread)
