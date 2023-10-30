@@ -118,8 +118,6 @@ endfunction()
 
 function(build src out name)
     set(OUT_PATH "${out}/out/${DIST_DIRNAME}/${name}")
-    set(BIN_PATH "${out}/bin/${DIST_DIRNAME}")
-
     file(MAKE_DIRECTORY "${OUT_PATH}")
 
     if(NOT DEFINED BUILD_TYPE)
@@ -142,9 +140,8 @@ function(build src out name)
             COMMAND ${CMAKE_COMMAND}
                 -Wno-dev
                 -DBUILD_OS=${BUILD_OS}
-                -DARCH=${BUILD_ARCH}
+                -DBUILD_ARCH=${BUILD_ARCH}
                 -DBUILD_TYPE=${BUILD_TYPE}
-                -DBIN_PATH=${BIN_PATH}
                 -A ${TargetArch}
                 "${src}"
             RESULT_VARIABLE STATUS
@@ -168,9 +165,8 @@ function(build src out name)
             COMMAND ${CMAKE_COMMAND}
                 -Wno-dev
                 -DBUILD_OS=${BUILD_OS}
-                -DARCH=${BUILD_ARCH}
+                -DBUILD_ARCH=${BUILD_ARCH}
                 -DBUILD_TYPE=${BUILD_TYPE}
-                -DBIN_PATH=${BIN_PATH}
                 "${src}"
             RESULT_VARIABLE STATUS
         )

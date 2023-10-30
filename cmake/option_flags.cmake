@@ -47,8 +47,8 @@ if(NOT DEFINED link_flags)
     set(link_flags "")
 endif()
 
-if("${ARCH}" STREQUAL "")
-    message(FATAL_ERROR "Unsupported target architecture {${ARCH}}.")
+if("${BUILD_ARCH}" STREQUAL "")
+    message(FATAL_ERROR "Unsupported target architecture {${BUILD_ARCH}}.")
 endif()
 
 if(MSVC)

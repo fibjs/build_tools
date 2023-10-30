@@ -1,3 +1,8 @@
+get_filename_component(BIN_PATH ${CMAKE_CURRENT_BINARY_DIR} DIRECTORY)
+get_filename_component(BIN_PATH ${BIN_PATH} DIRECTORY)
+get_filename_component(BIN_PATH ${BIN_PATH} DIRECTORY)
+set(BIN_PATH "${BIN_PATH}/bin/${BUILD_OS}_${BUILD_ARCH}_${BUILD_TYPE}")
+
 set(LIBRARY_OUTPUT_PATH "${BIN_PATH}")
 set(EXECUTABLE_OUTPUT_PATH "${BIN_PATH}")
 
@@ -12,7 +17,7 @@ function(setup_result_library name)
             RUNTIME_OUTPUT_DIRECTORY_RELEASE "${EXECUTABLE_OUTPUT_PATH}"
             RUNTIME_OUTPUT_DIRECTORY_DEBUG "${EXECUTABLE_OUTPUT_PATH}"
         )
-    elseif("${BUILD_OS}" STREQUAL "Darwin" OR "${BUILD_OS}" STREQUAL "iPhone")
+    elseif("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Darwin")
         target_link_libraries(${name} dl iconv stdc++ pthread)
     elseif("${BUILD_OS}" STREQUAL "FreeBSD")
         find_library(execinfo execinfo "/usr/local/lib" "/usr/lib")
@@ -22,7 +27,7 @@ function(setup_result_library name)
     else()
         target_link_libraries(${name} dl rt util pthread)
 
-        if(NOT HAVE_GLIB_C_ATOMIC_H AND NOT ${ARCH} STREQUAL "ia32")
+        if(NOT HAVE_GLIB_C_ATOMIC_H AND NOT ${BUILD_ARCH} STREQUAL "ia32")
             target_link_libraries(${name} atomic)
         endif()
     endif()
