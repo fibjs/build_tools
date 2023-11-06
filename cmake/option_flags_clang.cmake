@@ -67,8 +67,8 @@ elseif("${BUILD_OS}" STREQUAL "Linux")
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
     
-        set(flags "${flags} --target=${BUILD_TARGET} -I/usr/${BUILD_TARGET}/include -I/usr/${BUILD_TARGET}/include/c++/${GCC_VERSION} -I/usr/${BUILD_TARGET}/include/c++/${GCC_VERSION}/${BUILD_TARGET}")
-        set(link_flags "${link_flags} -L/usr/lib/gcc-cross/${BUILD_TARGET}/${GCC_VERSION} -L/usr/${BUILD_TARGET}/lib")
+        set(flags "${flags} --target=${BUILD_TARGET} -I/usr/${BUILD_TARGET}/include -I/usr/${BUILD_TARGET}/include/c++/${GCC_VERSION}/${BUILD_TARGET}")
+        set(link_flags "${link_flags} -L/usr/${BUILD_TARGET}/lib")
 
         set(CMAKE_ASM_COMPILER_TARGET "${BUILD_TARGET}")
         set(CMAKE_ASM-ATT_TARGET "${BUILD_TARGET}")
