@@ -36,7 +36,7 @@ endmacro()
 
 if("${BUILD_OS}" STREQUAL "Alpine")
     if(${BUILD_ARCH} STREQUAL "arm")
-        set(BUILD_OPTION "${BUILD_OPTION} -march=armv7-a -mfpu=vfp3 -marm")
+        set(flags "${flags} -march=armv7-a -mfpu=vfp3 -marm")
     endif()
 elseif("${BUILD_OS}" STREQUAL "Linux")
     if(NOT ${HOST_ARCH} STREQUAL ${BUILD_ARCH} AND "${CMAKE_C_COMPILER}" MATCHES "clang")
@@ -45,7 +45,7 @@ elseif("${BUILD_OS}" STREQUAL "Linux")
         elseif(${BUILD_ARCH} STREQUAL "ia32")
             set(BUILD_TARGET "i686-linux-gnu")
         elseif(${BUILD_ARCH} STREQUAL "arm")
-            set(BUILD_OPTION "${BUILD_OPTION} -march=armv7-a -mfpu=vfp3 -marm")
+            set(flags "${flags} -march=armv7-a -mfpu=vfp3 -marm")
             set(BUILD_TARGET "arm-linux-gnueabihf")
         elseif(${BUILD_ARCH} STREQUAL "arm64")
             set(BUILD_TARGET "aarch64-linux-gnu")
@@ -67,8 +67,8 @@ elseif("${BUILD_OS}" STREQUAL "Linux")
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
     
-        set(BUILD_OPTION "${BUILD_OPTION} --target=${BUILD_TARGET} -I/usr/${BUILD_TARGET}/include -I/usr/${BUILD_TARGET}/include/c++/${GCC_VERSION} -I/usr/${BUILD_TARGET}/include/c++/${GCC_VERSION}/${BUILD_TARGET}")
-        set(link_flags "${link_flags} ${BUILD_OPTION}  -L/usr/lib/gcc-cross/${BUILD_TARGET}/${GCC_VERSION} -L/usr/${BUILD_TARGET}/lib")
+        set(flags "${flags} --target=${BUILD_TARGET} -I/usr/${BUILD_TARGET}/include -I/usr/${BUILD_TARGET}/include/c++/${GCC_VERSION}/${BUILD_TARGET}")
+        set(link_flags "${link_flags} -L/usr/${BUILD_TARGET}/lib")
 
         set(CMAKE_ASM_COMPILER_TARGET "${BUILD_TARGET}")
         set(CMAKE_ASM-ATT_TARGET "${BUILD_TARGET}")
@@ -79,9 +79,9 @@ elseif("${BUILD_OS}" STREQUAL "Windows")
     fixup_CMAKE_BUILD_TYPE()
 
     if(${BUILD_ARCH} STREQUAL "x64")
-        set(BUILD_OPTION "${BUILD_OPTION} --target=x86_64-pc-windows-msvc")
+        set(flags "${flags} --target=x86_64-pc-windows-msvc")
     else()
-        set(BUILD_OPTION "${BUILD_OPTION} --target=i686-pc-windows-msvc")
+        set(flags "${flags} --target=i686-pc-windows-msvc")
     endif()
 
     # keep same name format with Unix
@@ -121,7 +121,7 @@ elseif("${BUILD_OS}" STREQUAL "iPhone")
         message(FATAL_ERROR "Unsupported target architecture {${BUILD_ARCH}}.")
     endif()
 
-    set(BUILD_OPTION "${BUILD_OPTION} --target=${BUILD_TARGET}")
+    set(flags "${flags} --target=${BUILD_TARGET}")
     set(CMAKE_ASM_COMPILER_TARGET "${BUILD_TARGET}")
 
     set(CMAKE_ASM_FLAGS "-miphoneos-version-min=12.0")
@@ -143,7 +143,7 @@ elseif("${BUILD_OS}" STREQUAL "Darwin")
         message(FATAL_ERROR "Unsupported target architecture {${BUILD_ARCH}}.")
     endif()
 
-    set(BUILD_OPTION "${BUILD_OPTION} --target=${BUILD_TARGET}")
+    set(flags "${flags} --target=${BUILD_TARGET}")
     set(CMAKE_ASM_COMPILER_TARGET "${BUILD_TARGET}")
 
     set(CMAKE_ASM_FLAGS "-mmacosx-version-min=10.13")
@@ -157,9 +157,9 @@ endif()
 set(flags "${flags} -fPIC -fsigned-char -fmessage-length=0 -fdata-sections -ffunction-sections")
 
 if(${BUILD_TYPE} STREQUAL "release")
-	set(flags "${flags} -O3 -s ${BUILD_OPTION} -w -fvisibility=hidden")
+	set(flags "${flags} -O3 -s -w -fvisibility=hidden")
 
-	set(link_flags "${link_flags} ${BUILD_OPTION} -static-libstdc++")
+	set(link_flags "${link_flags} -static-libstdc++")
 	add_definitions(-DNDEBUG=1)
 
     if("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Darwin")
@@ -168,7 +168,7 @@ if(${BUILD_TYPE} STREQUAL "release")
 		set(link_flags "${link_flags} -static-libgcc -Wl,--gc-sections")
 	endif()
 elseif(${BUILD_TYPE} STREQUAL "debug")
-	set(flags "${flags} -g1 -O0 ${BUILD_OPTION}")
+	set(flags "${flags} -g1 -O0")
 
     if(${BUILD_ARCH} STREQUAL "mips64")
         set(flags "${flags} -mxgot")
@@ -180,7 +180,6 @@ elseif(${BUILD_TYPE} STREQUAL "debug")
         set(flags "${flags} -w")
     endif()
 
-    set(link_flags "${link_flags} ${BUILD_OPTION}")
 	add_definitions(-DDEBUG=1)
 
 	if("${BUILD_OS}" STREQUAL "Windows")
