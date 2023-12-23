@@ -49,7 +49,7 @@ function(config)
         check_glibc(fcntl yes GLIB_C_FCNTL)
     endif()
 
-    configure_file(${CMAKE_CURRENT_LIST_DIR}/../tools/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+    configure_file(${CMAKE_CURRENT_LIST_DIR}/../tools/glibc_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/glibc_config.h)
 endfunction()
 
 config()
