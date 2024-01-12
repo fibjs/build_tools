@@ -174,11 +174,7 @@ elseif(${BUILD_TYPE} STREQUAL "debug")
         set(flags "${flags} -mxgot")
     endif()
 
-    if("$ENV{CI}" STREQUAL "")
-        set(flags "${flags} -Wall -Wno-unused-function")
-    else()
-        set(flags "${flags} -w")
-    endif()
+    set(flags "${flags} -Wall -Wno-unused-function")
 
 	add_definitions(-DDEBUG=1)
 

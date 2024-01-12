@@ -14,6 +14,8 @@ usage() {
     echo "      Clean the build folder."
     echo "  ci: "
     echo "      Specifies the environment is CI."
+    echo "  dev: "
+    echo "      Specifies to build in dev mode."
     echo "  -h, --help:"
     echo "      Print this message and exit."
     echo "  -j: enable make '-j' option."
@@ -36,9 +38,6 @@ for i in "$@"; do
         ;;
     clean)
         CLEAN_BUILD="true"
-        ;;
-    ci)
-        export CI="ci"
         ;;
     -j*)
         BUILD_JOBS="${i#-j}"

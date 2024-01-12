@@ -70,8 +70,10 @@ goto finished
 	echo       Specifies the architecture for code generation.
 	echo   clean: 
 	echo       Clean the build folder.
-	echo   ci: 
+    echo   ci: 
 	echo       Specifies the environment is CI.
+    echo   dev: 
+	echo       Specifies to build in dev mode.
 	echo   -h, --help:
 	echo       Print this message and exit.
 	echo   -j: enable make '-j' option.
