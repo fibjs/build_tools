@@ -317,7 +317,7 @@ if [[ "$WORK_ROOT" == "" ]]; then
 
     for i in $@; do
         case $i in
-        ia32 | x64 | arm | arm64 | mips64 | ppc64 | s390x | riscv64 | loong64)
+        ia32 | x64 | arm | arm64 | mips64 | ppc64 | s390x | riscv64 | loong64 | loong64ow)
             BUILD_ARCH=$i
             ;;
         linux | alpine | android)
