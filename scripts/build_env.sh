@@ -332,11 +332,16 @@ if [[ "$WORK_ROOT" == "" ]]; then
             BUILD_ARCH=x64
         fi
 
-        USER_ID=$(id -u ${USER})
-
         if [ -t 1 ]; then DOCKER_TTY='ti'; else DOCKER_TTY='i'; fi
-        docker run -${DOCKER_TTY} --rm -v ${WORK_ROOT}:${WORK_ROOT} fibjs/${BUILD_DOCKER}-build-env:${BUILD_ARCH} \
-            bash -c "cd ${WORK_ROOT} && usermod -u ${USER_ID} fibjs && groupmod -g ${USER_ID} fibjs && sudo -E -u fibjs bash build ${args}"
+
+        USER_ID=$(id -u ${USER})
+        if [[ $USER_ID == 0 ]]; then
+            docker run -${DOCKER_TTY} --rm -v ${WORK_ROOT}:${WORK_ROOT} fibjs/${BUILD_DOCKER}-build-env:${BUILD_ARCH} \
+                bash -c "cd ${WORK_ROOT} && bash build ${args}"
+        else
+            docker run -${DOCKER_TTY} --rm -v ${WORK_ROOT}:${WORK_ROOT} fibjs/${BUILD_DOCKER}-build-env:${BUILD_ARCH} \
+                bash -c "cd ${WORK_ROOT} && usermod -u ${USER_ID} fibjs && groupmod -g ${USER_ID} fibjs && sudo -E -u fibjs bash build ${args}"
+        fi
         exit $?
     fi
 
