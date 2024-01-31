@@ -74,8 +74,6 @@ elseif("${BUILD_OS}" STREQUAL "Linux")
         set(CMAKE_ASM-ATT_TARGET "${BUILD_TARGET}")
         set(CMAKE_ASM-ATT_COMPILER "/usr/${BUILD_TARGET}/bin/as")
     endif()
-
-    set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -Wno-unused-command-line-argument")
 elseif("${BUILD_OS}" STREQUAL "Windows")
     clean_clang_flags()
     fixup_CMAKE_BUILD_TYPE()
@@ -157,6 +155,7 @@ elseif("${BUILD_OS}" STREQUAL "Darwin")
 endif()
 
 set(flags "${flags} -fPIC -fsigned-char -fmessage-length=0 -fdata-sections -ffunction-sections")
+set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -Wno-unused-command-line-argument")
 
 if(${BUILD_TYPE} STREQUAL "release")
 	set(flags "${flags} -O3 -s -w -fvisibility=hidden")
