@@ -25,3 +25,6 @@ ENV AS=/usr/cross-tools/bin/loongarch64-linux-gnu-as \
     LD=/usr/cross-tools/bin/loongarch64-linux-gnu-ld
 
 ENV QEMU_LD_PREFIX="/usr/cross-tools/sysroot"
+
+RUN chmod 777 /root
+RUN echo "adduser \$1 --uid \$2 --disabled-password --no-create-home --gecos '' -q" > /usr/build_user.sh
