@@ -340,7 +340,7 @@ if [[ "$WORK_ROOT" == "" ]]; then
                 bash -c "cd ${WORK_ROOT} && bash build ${args}"
         else
             docker run -${DOCKER_TTY} --rm -v ${WORK_ROOT}:${WORK_ROOT} fibjs/${BUILD_DOCKER}-build-env:${BUILD_ARCH} \
-                bash -c "cd ${WORK_ROOT} && usermod -u ${USER_ID} fibjs && groupmod -g ${USER_ID} fibjs && sudo -E -u fibjs bash build ${args}"
+                bash -c "cd ${WORK_ROOT} && bash /usr/build_user.sh ${USER} ${USER_ID} && sudo -E -u ${USER} bash build ${args}"
         fi
         exit $?
     fi

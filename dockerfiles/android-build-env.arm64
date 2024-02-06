@@ -1,0 +1,6 @@
+FROM dockcross/android-arm64
+
+RUN apt-get update && apt-get upgrade -y
+
+RUN chmod 777 /root
+RUN echo "adduser \$1 --uid \$2 --disabled-password --no-create-home --gecos '' -q" > /usr/build_user.sh
