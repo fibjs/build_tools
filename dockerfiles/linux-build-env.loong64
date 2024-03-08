@@ -7,7 +7,7 @@ RUN curl -o loongarch64-linux-gnu.tar.xz --retry 5 -LO https://github.com/sunhai
     tar -C /usr -xvf loongarch64-linux-gnu.tar.xz && \
     rm loongarch64-linux-gnu.tar.xz
 
-RUN curl -o qemu-loongarch64 --retry 5 -LO https://github.com/sunhaiyong1978/CLFS-for-LoongArch/releases/download/6.0/qemu-loongarch64 && \
+RUN curl -o qemu-loongarch64 --retry 5 -LO https://github.com/loongson/build-tools/releases/download/2023.08.08/qemu-loongarch64 && \
     chmod 755 qemu-loongarch64 && mv qemu-loongarch64 /usr/cross-tools
 
 # RUN update-binfmts --enable

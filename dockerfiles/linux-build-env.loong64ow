@@ -9,8 +9,8 @@ RUN curl -o loongarch64-linux-gnu.tar.xz --retry 5 -LO http://ftp.loongnix.cn/to
 
 RUN mv /usr/loongson-gnu-toolchain-8.3.novec-x86_64-loongarch64-linux-gnu-rc1.1 /usr/cross-tools
 
-COPY qemu-loongarch64.tar.gz .
-RUN tar -C /usr/cross-tools -xvf qemu-loongarch64.tar.gz && rm qemu-loongarch64.tar.gz
+RUN curl -o qemu-loongarch64 --retry 5 -LO https://github.com/Loongson-Cloud-Community/qemu-user-static/releases/download/x86_abi1.0/qemu-loongarch64-static && \
+    chmod 755 qemu-loongarch64 && mv qemu-loongarch64 /usr/cross-tools
 
 # RUN update-binfmts --enable
 # RUN update-binfmts --install qemu-loongarch64 /usr/cross-tools/qemu-loongarch64 \
