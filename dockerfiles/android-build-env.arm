@@ -1,12 +1,6 @@
-ARG ORG=dockcross
-FROM ${ORG}/base:latest
-MAINTAINER Matt McCormick "matt.mccormick@kitware.com"
+FROM fibjs/linux-build-env:x64
 
-# The cross-compiling emulator
-RUN apt-get update && apt-get install -y \
-  qemu-user \
-  qemu-user-static \
-  unzip
+RUN apt-get update && apt-get install -y unzip curl
 
 ENV CROSS_TRIPLE=arm-linux-androideabi
 ENV CROSS_ROOT=/usr/${CROSS_TRIPLE}
@@ -17,8 +11,8 @@ ENV AS=${CROSS_ROOT}/bin/llvm-as \
     CXX=${CROSS_ROOT}/bin/clang++ \
     LD=${CROSS_ROOT}/bin/ld
 
-ENV ANDROID_NDK_REVISION 25b
-ENV ANDROID_API 24
+ENV ANDROID_NDK_REVISION 26b
+ENV ANDROID_API 25
 
 RUN mkdir -p /build && \
     cd /build && \
@@ -34,45 +28,3 @@ RUN mkdir -p /build && \
     rm -rf /build && \
     find ${CROSS_ROOT} -exec chmod a+r '{}' \; && \
     find ${CROSS_ROOT} -executable -exec chmod a+x '{}' \;
-
-RUN echo "set(CMAKE_SYSTEM_NAME Android)\n\
-set(CMAKE_SYSTEM_VERSION 1)\n\
-set(CMAKE_SYSTEM_PROCESSOR armv7-a)\n\
-set(CMAKE_ANDROID_ARCH_ABI armeabi-v7a)\n\n\
-set(cross_triple \$ENV{CROSS_TRIPLE})\n\
-set(CMAKE_ANDROID_STANDALONE_TOOLCHAIN \$ENV{CROSS_ROOT})\n\
-set(CMAKE_ANDROID_ARM_MODE ON)\n\
-set(CMAKE_ANDROID_ARM_NEON ON)\n\n\
-set(CMAKE_C_COMPILER \$ENV{CC})\n\
-set(CMAKE_CXX_COMPILER \$ENV{CXX})\n\
-set(CMAKE_Fortran_COMPILER \$ENV{FC})\n\
-# Link to android logger\n\
-set(CMAKE_EXE_LINKER_FLAGS \"-llog\")\n\
-set(CMAKE_SHARED_LINKER_FLAGS \"-llog\")\n\n\
-set(CMAKE_FIND_ROOT_PATH \$ENV{CROSS_ROOT})\n\
-set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)\n\
-set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)\n\
-set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)\n\
-set(CMAKE_SYSROOT \$ENV{CROSS_ROOT}/sysroot)\n\n\
-set(CMAKE_CROSSCOMPILING_EMULATOR /usr/bin/qemu-arm)" > ${CROSS_ROOT}/Toolchain.cmake
-
-ENV CMAKE_TOOLCHAIN_FILE ${CROSS_ROOT}/Toolchain.cmake
-
-# Build-time metadata as defined at http://label-schema.org
-ARG BUILD_DATE
-ARG IMAGE=dockcross/android-x86_64
-ARG VERSION=latest
-ARG VCS_REF
-ARG VCS_URL
-LABEL org.label-schema.build-date=$BUILD_DATE \
-      org.label-schema.name=$IMAGE \
-      org.label-schema.version=$VERSION \
-      org.label-schema.vcs-ref=$VCS_REF \
-      org.label-schema.vcs-url=$VCS_URL \
-      org.label-schema.schema-version="1.0"
-ENV DEFAULT_DOCKCROSS_IMAGE ${IMAGE}:${VERSION}
-
-RUN apt-get update && apt-get upgrade -y
-
-RUN chmod 777 /root
-RUN echo "adduser \$1 --uid \$2 --disabled-password --no-create-home --gecos '' -q" > /usr/build_user.sh

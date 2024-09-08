@@ -35,7 +35,7 @@ function(config)
         HAVE_GLIB_C_ATOMIC_H)
     set(HAVE_GLIB_C_ATOMIC_H ${HAVE_GLIB_C_ATOMIC_H} PARENT_SCOPE)
 
-    if(NOT ANDROID)
+    if(NOT "${BUILD_OS}" STREQUAL "Android")
         check_include_files(iconv.h HAVE_ICONV_H)
         set(HAVE_ICONV_H "${HAVE_ICONV_H}")
     endif()
