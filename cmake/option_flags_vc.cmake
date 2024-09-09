@@ -21,12 +21,14 @@ macro(configure_msvc_mp)
         CMAKE_CXX_FLAGS
         CMAKE_CXX_FLAGS_RELEASE)
 
-    foreach(variable ${variables})
-        # enforce multiple core processing
-        if(NOT ${variable} MATCHES "/MD" AND NOT ${variable} MATCHES "/MP")
-            set(${variable} "${${variable}} /MP" CACHE STRING "MSVC_${variable}" FORCE)
-        endif()
-    endforeach()
+    if("$ENV{COMMIT_ID}" STREQUAL "")
+        foreach(variable ${variables})
+            # enforce multiple core processing
+            if(NOT ${variable} MATCHES "/MD" AND NOT ${variable} MATCHES "/MP")
+                set(${variable} "${${variable}} /MP" CACHE STRING "MSVC_${variable}" FORCE)
+            endif()
+        endforeach()
+    endif()
 endmacro()
 
 # keep same name format with Unix
