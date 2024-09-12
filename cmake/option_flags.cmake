@@ -55,7 +55,7 @@ if("${BUILD_ARCH}" STREQUAL "")
     set(BUILD_ARCH ${HOST_ARCH})
 endif()
 
-if(MSVC)
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 	include(${CMAKE_CURRENT_LIST_DIR}/option_flags_vc.cmake)
 else()
 	include(${CMAKE_CURRENT_LIST_DIR}/option_flags_clang.cmake)

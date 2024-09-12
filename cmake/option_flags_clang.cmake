@@ -20,6 +20,10 @@ macro(clean_clang_flags)
         string(REGEX REPLACE
             "-Xclang --dependent-lib=msvcrt" "-Xclang --dependent-lib=libcmt"
             ${variable} "${${variable}}")
+
+        if(${variable} MATCHES "/MD")
+            string(REGEX REPLACE "/MD" "/MT" ${variable} "${${variable}}")
+        endif()
             
         set(${variable} "${${variable}}" CACHE STRING "CLANG_${variable}" FORCE)
     endforeach()
@@ -79,17 +83,12 @@ elseif("${BUILD_OS}" STREQUAL "Windows")
     clean_clang_flags()
     fixup_CMAKE_BUILD_TYPE()
 
-    if(${BUILD_ARCH} STREQUAL "x64")
-        set(flags "${flags} --target=x86_64-pc-windows-msvc")
-    else()
-        set(flags "${flags} --target=i686-pc-windows-msvc")
-    endif()
-
     # keep same name format with Unix
     set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
 
 	add_definitions(-DWIN32 -D_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_RAND_S -DNOMINMAX)
-	set(flags "${flags} -fms-extensions -fmsc-version=1910 -frtti")
+	set(flags "${flags} /showFilenames /EHsc /utf-8 -fms-extensions -fmsc-version=1910 -frtti")
+    set(link_flags "${link_flags} /SAFESEH:NO")
 
     if(${BUILD_TYPE} STREQUAL "debug")
         set(flags "${flags} -Xclang --dependent-lib=libcmtd")
@@ -160,15 +159,17 @@ set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -Wno-unused-command-line-argument")
 
 if(${BUILD_TYPE} STREQUAL "release")
 	set(flags "${flags} -O3 -s -w -fvisibility=hidden")
+    add_definitions(-DNDEBUG=1)
 
-	set(link_flags "${link_flags} -static-libstdc++")
-	add_definitions(-DNDEBUG=1)
+    if(NOT "${BUILD_OS}" STREQUAL "Windows")
+        set(link_flags "${link_flags} -static-libstdc++")
 
-    if("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Darwin")
-        set(link_flags "${link_flags} -Wl,-dead_strip")
-    else()
-		set(link_flags "${link_flags} -static-libgcc -Wl,--gc-sections")
-	endif()
+        if("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Darwin")
+            set(link_flags "${link_flags} -Wl,-dead_strip")
+        else()
+            set(link_flags "${link_flags} -static-libgcc -Wl,--gc-sections")
+        endif()
+    endif()
 elseif(${BUILD_TYPE} STREQUAL "debug")
 	set(flags "${flags} -g1 -O0")
 

@@ -124,7 +124,7 @@ function(build src out name)
         message(FATAL_ERROR "[get_env::build] BUILD_TYPE haven't been set, check your input.")
     endif()
 
-    if(("${BUILD_OS}" STREQUAL "Windows") AND (NOT "${BUILD_USE_CLANG}" STREQUAL "true"))
+    if("${BUILD_OS}" STREQUAL "Windows")
         if(${BUILD_ARCH} STREQUAL "x64")
             set(TargetArch "x64")
         elseif(${BUILD_ARCH} STREQUAL "ia32")
@@ -142,6 +142,7 @@ function(build src out name)
                 -DBUILD_OS=${BUILD_OS}
                 -DBUILD_ARCH=${BUILD_ARCH}
                 -DBUILD_TYPE=${BUILD_TYPE}
+                -T ClangCL
                 -A ${TargetArch}
                 "${src}"
             RESULT_VARIABLE STATUS
