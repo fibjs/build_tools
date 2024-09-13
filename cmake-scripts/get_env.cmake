@@ -135,6 +135,10 @@ function(build src out name)
             set(TargetArch "ARM")
         endif()
 
+        if("${BUILD_WITH_MSVC}" STREQUAL "")
+            set(MSVC_BUILD_TARGET "-T ClangCL")
+        endif()
+
         execute_process(WORKING_DIRECTORY "${OUT_PATH}"
             OUTPUT_FILE CMake.log 
             COMMAND ${CMAKE_COMMAND}
@@ -142,7 +146,7 @@ function(build src out name)
                 -DBUILD_OS=${BUILD_OS}
                 -DBUILD_ARCH=${BUILD_ARCH}
                 -DBUILD_TYPE=${BUILD_TYPE}
-                -T ClangCL
+                ${MSVC_BUILD_TARGET}
                 -A ${TargetArch}
                 "${src}"
             RESULT_VARIABLE STATUS
