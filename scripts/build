@@ -20,8 +20,8 @@ usage() {
     echo "      Print this message and exit."
     echo "  -j: enable make '-j' option."
     echo "      if 'n' is not given, will set jobs to auto detected core count, otherwise n is used."
-    echo "  --use-clang:"
-    echo "      Force use clang on Windows."
+    echo "  --use-msvc:"
+    echo "      force use msvc on Windows, default is clangcl."
     echo ""
 }
 
@@ -46,8 +46,9 @@ for i in "$@"; do
         usage
         exit 1
         ;;
-    --use-clang)
-        BUILD_USE_CLANG="true"
+    --use-msvc)
+        BUILD_WITH_MSVC=true
+        shift
         ;;
     *)
         echo "illegal option $i"
@@ -62,5 +63,5 @@ cmake -DBUILD_ARCH=${BUILD_ARCH} \
     -DBUILD_OS=${BUILD_OS} \
     -DCLEAN_BUILD=${CLEAN_BUILD} \
     -DBUILD_JOBS=${BUILD_JOBS} \
-    -DBUILD_USE_CLANG=${BUILD_USE_CLANG} \
+    -DBUILD_WITH_MSVC=${BUILD_WITH_MSVC} \
     -P build.cmake

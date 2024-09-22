@@ -136,8 +136,12 @@ function(build src out name)
         endif()
 
         if("${BUILD_WITH_MSVC}" STREQUAL "")
-            set(MSVC_BUILD_TARGET "-T ClangCL")
+            set(MSBUILD_BUILD_TARGET "-T ClangCL")
         endif()
+        set(MSBUILD_PARALLEL_JOBS "-j ${BUILD_JOBS}")
+
+        # message("[debug] build:: MSBUILD_BUILD_TARGET is ${MSBUILD_BUILD_TARGET}")
+        # message("[debug] build:: MSBUILD_PARALLEL_JOBS is ${MSBUILD_PARALLEL_JOBS}")
 
         execute_process(WORKING_DIRECTORY "${OUT_PATH}"
             OUTPUT_FILE CMake.log 
@@ -146,7 +150,7 @@ function(build src out name)
                 -DBUILD_OS=${BUILD_OS}
                 -DBUILD_ARCH=${BUILD_ARCH}
                 -DBUILD_TYPE=${BUILD_TYPE}
-                ${MSVC_BUILD_TARGET}
+                ${MSBUILD_BUILD_TARGET}
                 -A ${TargetArch}
                 "${src}"
             RESULT_VARIABLE STATUS
@@ -159,6 +163,7 @@ function(build src out name)
         execute_process(WORKING_DIRECTORY "${OUT_PATH}"
             COMMAND ${CMAKE_COMMAND} 
             --build ./
+            ${MSBUILD_PARALLEL_JOBS}
             --config ${BUILD_TYPE}
             -- /nologo /verbosity:minimal
             /p:CL_MPcount=${BUILD_JOBS}

@@ -37,8 +37,8 @@ for %%a in (%*) do (
         set ARG_ERROR=no
     )
 
-    if "%%a"=="--use-clang" (
-    	set BUILD_USE_CLANG=true
+    if "%%a"=="--use-msvc" (
+    	set BUILD_WITH_MSVC=1
         set ARG_ERROR=no
     )
 
@@ -56,7 +56,7 @@ for %%a in (%*) do (
     )
 )
 
-cmake -DBUILD_ARCH=%BUILD_ARCH% -DBUILD_TYPE=%BUILD_TYPE% -DBUILD_JOBS=%BUILD_JOBS% -DCLEAN_BUILD=%CLEAN_BUILD% -DBUILD_USE_CLANG=%BUILD_USE_CLANG% -P build.cmake
+cmake -DBUILD_ARCH=%BUILD_ARCH% -DBUILD_TYPE=%BUILD_TYPE% -DBUILD_JOBS=%BUILD_JOBS% -DCLEAN_BUILD=%CLEAN_BUILD% -DBUILD_WITH_MSVC=%BUILD_WITH_MSVC% -P build.cmake
 
 goto finished
 
