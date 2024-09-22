@@ -11,10 +11,11 @@ add_executable(${name} ${src_list})
 include_directories(${PROJECT_SOURCE_DIR}/../ "${PROJECT_SOURCE_DIR}/../include" "${PROJECT_SOURCE_DIR}/../../")
 
 if(NOT DEFINED test_libs)
-	message(FATAL_ERROR "[LibraryTest.cmake] test_libs is required!")
+	set(test_libs "")
 endif()
 
 set(libs ${libname} ${libs} ${test_libs})
+
 foreach(lib ${libs})
 	target_link_libraries(${name} "${BIN_PATH}/${CMAKE_STATIC_LIBRARY_PREFIX}${lib}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 endforeach()

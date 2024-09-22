@@ -27,8 +27,8 @@ for %%a in (%*) do (
         set ARG_ERROR=no
     )
 
-    if "%%a"=="--use-clang" (
-    	set BUILD_USE_CLANG=true
+    if "%%a"=="--use-msvc" (
+    	set BUILD_WITH_MSVC=1
         set ARG_ERROR=no
     )
 
@@ -46,7 +46,7 @@ for %%a in (%*) do (
     )
 )
 
-cmake -DBUILD_ARCH=%BUILD_ARCH% -DBUILD_TYPE=%BUILD_TYPE% -DBUILD_JOBS=%BUILD_JOBS% -DCLEAN_BUILD=%CLEAN_BUILD% -DBUILD_USE_CLANG=%BUILD_USE_CLANG% -P build.cmake
+cmake -DBUILD_ARCH=%BUILD_ARCH% -DBUILD_TYPE=%BUILD_TYPE% -DBUILD_JOBS=%BUILD_JOBS% -DCLEAN_BUILD=%CLEAN_BUILD% -DBUILD_WITH_MSVC=%BUILD_WITH_MSVC% -P build.cmake
 
 goto finished
 
@@ -66,8 +66,8 @@ goto finished
 	echo       Print this message and exit.
 	echo   -j: enable make '-j' option.
 	echo       if 'n' is not given, will set jobs to auto detected core count, otherwise n is used.
-	echo   --use-clang:
-	echo       Force use clang on Windows.
+	echo   --use-msvc:
+	echo       force use msvc on Windows, default is clangcl.
 	echo.
     exit /B 1
 

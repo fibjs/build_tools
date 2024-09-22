@@ -16,7 +16,7 @@ macro(clean_clang_flags)
         string(REGEX REPLACE
             "-D_DLL" ""
             ${variable} "${${variable}}")
-        
+
         string(REGEX REPLACE
             "-Xclang --dependent-lib=msvcrt" "-Xclang --dependent-lib=libcmt"
             ${variable} "${${variable}}")
@@ -24,7 +24,7 @@ macro(clean_clang_flags)
         if(${variable} MATCHES "/MD")
             string(REGEX REPLACE "/MD" "/MT" ${variable} "${${variable}}")
         endif()
-            
+
         set(${variable} "${${variable}}" CACHE STRING "CLANG_${variable}" FORCE)
     endforeach()
 endmacro()
@@ -35,6 +35,23 @@ macro(fixup_CMAKE_BUILD_TYPE)
         set(CMAKE_BUILD_TYPE Debug)
     elseif(${BUILD_TYPE} STREQUAL "release")
         set(CMAKE_BUILD_TYPE Release)
+    endif()
+endmacro()
+
+macro(configure_clang_cl_mp)
+    set(variables
+        CMAKE_C_FLAGS
+        CMAKE_C_FLAGS_RELEASE
+        CMAKE_CXX_FLAGS
+        CMAKE_CXX_FLAGS_RELEASE)
+
+    if("$ENV{COMMIT_ID}" STREQUAL "")
+        foreach(variable ${variables})
+            # enforce multiple core processing
+            if(NOT ${variable} MATCHES "/MD" AND NOT ${variable} MATCHES "/MP")
+                set(${variable} "${${variable}} /MP" CACHE STRING "CLANGCL_${variable}" FORCE)
+            endif()
+        endforeach()
     endif()
 endmacro()
 
@@ -71,7 +88,7 @@ elseif("${BUILD_OS}" STREQUAL "Linux")
             OUTPUT_VARIABLE GCC_VERSION
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
-    
+
         set(flags "${flags} --target=${BUILD_TARGET} -I/usr/${BUILD_TARGET}/include -I/usr/${BUILD_TARGET}/include/c++/${GCC_VERSION}/${BUILD_TARGET}")
         set(link_flags "${link_flags} -L/usr/${BUILD_TARGET}/lib")
 
@@ -82,12 +99,24 @@ elseif("${BUILD_OS}" STREQUAL "Linux")
 elseif("${BUILD_OS}" STREQUAL "Windows")
     clean_clang_flags()
     fixup_CMAKE_BUILD_TYPE()
+    configure_clang_cl_mp()
+
+    # it's not necessary to set target for clang-cl,
+    # but we leave here for convenience if v8 switch back to clang.exe in the future
+    #
+    # if(${BUILD_ARCH} STREQUAL "x64") # x64
+    # set(flags "${flags} --target=x86_64-pc-windows-msvc")
+    # elseif(${BUILD_ARCH} STREQUAL "arm64") # arm64
+    # set(flags "${flags} --target=aarch64-pc-windows-msvc")
+    # else() # ia32
+    # set(flags "${flags} --target=i686-pc-windows-msvc")
+    # endif()
 
     # keep same name format with Unix
     set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
 
-	add_definitions(-DWIN32 -D_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_RAND_S -DNOMINMAX)
-	set(flags "${flags} /showFilenames /EHsc /utf-8 -fms-extensions -fmsc-version=1910 -frtti")
+    add_definitions(-DWIN32 -D_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_RAND_S -DNOMINMAX)
+    set(flags "${flags} /showFilenames /EHsc /utf-8 -fms-extensions -fmsc-version=1910 -frtti")
     set(link_flags "${link_flags} /SAFESEH:NO")
 
     if(${BUILD_TYPE} STREQUAL "debug")
@@ -158,7 +187,7 @@ set(flags "${flags} -fPIC -fsigned-char -fmessage-length=0 -fdata-sections -ffun
 set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -Wno-unused-command-line-argument")
 
 if(${BUILD_TYPE} STREQUAL "release")
-	set(flags "${flags} -O3 -s -w -fvisibility=hidden")
+    set(flags "${flags} -O3 -s -w -fvisibility=hidden")
     add_definitions(-DNDEBUG=1)
 
     if(NOT "${BUILD_OS}" STREQUAL "Windows")
@@ -171,7 +200,7 @@ if(${BUILD_TYPE} STREQUAL "release")
         endif()
     endif()
 elseif(${BUILD_TYPE} STREQUAL "debug")
-	set(flags "${flags} -g1 -O0")
+    set(flags "${flags} -g1 -O0")
 
     if(${BUILD_ARCH} STREQUAL "mips64")
         set(flags "${flags} -mxgot")
@@ -179,9 +208,9 @@ elseif(${BUILD_TYPE} STREQUAL "debug")
 
     set(flags "${flags} -Wall -Wno-unused-function")
 
-	add_definitions(-DDEBUG=1)
+    add_definitions(-DDEBUG=1)
 
-	if("${BUILD_OS}" STREQUAL "Windows")
-		add_definitions(-D_DEBUG)
-	endif()
+    if("${BUILD_OS}" STREQUAL "Windows")
+        add_definitions(-D_DEBUG)
+    endif()
 endif()

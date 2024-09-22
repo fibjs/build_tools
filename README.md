@@ -8,9 +8,9 @@ To use build_tools for fibjs, you need install:
 
 - CMake >= 3.0
 - C/Cpp Compiler
-    - Windows: clang/VC++
-    - Linux: clang
-    - MacOS: clang
+  - Windows: clang/VC++
+  - Linux: clang
+  - MacOS: clang
 
 To explain how to use built_tools, we try to compile [examples/hello](./examples/hello/build.cmake).
 
@@ -18,7 +18,7 @@ All `<built_tool_path>` in codes refers to this project's root path.
 
 ### Workflow on CMake ccripts
 
-We recommend CMake script-mode as build workflow, that is, instead of bash/sh/cmd/powershell, just use CMake script to 
+We recommend CMake script-mode as build workflow, that is, instead of bash/sh/cmd/powershell, just use CMake script to
 drive your build.
 
 ```CMake
@@ -44,7 +44,7 @@ else()
 endif()
 ```
 
-As of this script, `build` funciton is defined in  `<built_tool_path>/cmake-scripts/get_env.cmake`.
+As of this script, `build` funciton is defined in `<built_tool_path>/cmake-scripts/get_env.cmake`.
 
 ```CMake
 build(src_dirname, outputpath)
@@ -81,11 +81,11 @@ cmake -DBUILD_ARCH=x64\
     -DBUILD_TYPE=release\
     -DCLEAN_BUILD=""\
     -DBUILD_JOBS=4\
-    -DBUILD_USE_CLANG=1\
+    -DBUILD_WITH_MSVC=1\
     -P build.cmake
 ```
 
-see more configuration on 
+see more configuration on
 
 - [examples/hello/build](./examples/hello/build) for bash
 - [examples/hello/build.cmd](./examples/hello/build.cmd) for windows cmd

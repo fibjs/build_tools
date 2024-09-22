@@ -9,7 +9,7 @@ if("${CLEAN_BUILD}" STREQUAL "true")
     rimraf(${BIN_ROOT})
     rimraf(${OUT_ROOT})
 else()
-    build("${CMAKE_CURRENT_SOURCE_DIR}" "${WORK_ROOT}", "hello")
+    build("${CMAKE_CURRENT_SOURCE_DIR}" "${WORK_ROOT}" "hello")
 
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test")
         build("${CMAKE_CURRENT_SOURCE_DIR}/test" "${WORK_ROOT}" "hello_test")
