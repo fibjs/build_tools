@@ -115,7 +115,7 @@ elseif("${BUILD_OS}" STREQUAL "Windows")
     # keep same name format with Unix
     set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
 
-    add_definitions(-DWIN32 -D_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_RAND_S -DNOMINMAX)
+    add_definitions(-DWIN32 -D_LIB -D_CRT_SECURE_NO_WARNINGS -D_CRT_RAND_S -DNOMINMAX -DUNICODE -D_UNICODE)
     set(flags "${flags} /showFilenames /EHsc /utf-8 -fms-extensions -fmsc-version=1910 -frtti")
     set(link_flags "${link_flags} /SAFESEH:NO")
 
@@ -183,7 +183,7 @@ elseif("${BUILD_OS}" STREQUAL "Darwin")
     endif()
 endif()
 
-set(flags "${flags} -fPIC -fsigned-char -fmessage-length=0 -fdata-sections -ffunction-sections")
+set(flags "${flags} -fPIC -fsigned-char -fshort-wchar -fmessage-length=0 -fdata-sections -ffunction-sections")
 set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -Wno-unused-command-line-argument")
 
 if(${BUILD_TYPE} STREQUAL "release")
