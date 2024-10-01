@@ -2,6 +2,7 @@ FROM multiarch/alpine:arm64-latest-stable
 
 RUN apk add bash sudo curl tar
 RUN apk add cmake make && apk add git && apk add xz && apk add shadow
+RUN apk add pkgconfig gtk+3.0-dev webkit2gtk-dev
 
 RUN curl --retry 5 -LO http://musl.cc/aarch64-linux-musl-cross.tgz && \
     tar -C /usr -xvf aarch64-linux-musl-cross.tgz && \
