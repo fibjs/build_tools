@@ -150,6 +150,8 @@ elseif("${BUILD_OS}" STREQUAL "iPhone")
         message(FATAL_ERROR "Unsupported target architecture {${BUILD_ARCH}}.")
     endif()
 
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "" CACHE STRING "Force unset of the deployment target for iOS" FORCE)
+
     set(flags "${flags} --target=${BUILD_TARGET}")
     set(CMAKE_ASM_COMPILER_TARGET "${BUILD_TARGET}")
 
