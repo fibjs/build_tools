@@ -126,7 +126,7 @@ elseif("${BUILD_OS}" STREQUAL "Windows")
     endif()
 elseif("${BUILD_OS}" STREQUAL "iPhone")
     set(flags "${flags} -Wno-nullability-completeness -miphoneos-version-min=12.0")
-    set(link_flags "${link_flags} -miphoneos-version-min=12.0")
+    set(link_flags "${link_flags} -miphoneos-version-min=12.0 -framework Foundation")
 
     if(${BUILD_ARCH} STREQUAL "x64")
         execute_process(
