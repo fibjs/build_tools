@@ -185,7 +185,7 @@ elseif("${BUILD_OS}" STREQUAL "Darwin")
     endif()
 endif()
 
-set(flags "${flags} -fPIC -fsigned-char -fshort-wchar -fmessage-length=0 -fdata-sections -ffunction-sections")
+set(flags "${flags} -fPIC -fsigned-char -fmessage-length=0 -fdata-sections -ffunction-sections")
 set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -Wno-unused-command-line-argument")
 
 if(${BUILD_TYPE} STREQUAL "release")
