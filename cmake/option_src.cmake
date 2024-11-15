@@ -4,7 +4,7 @@ endif()
 
 if(NOT DEFINED src_list)
 	file(GLOB_RECURSE src_list "${src_folder}/*.c*")
-	if("${BUILD_OS}" STREQUAL "Darwin" OR "${BUILD_OS}" STREQUAL "iPhone")
+	if("${BUILD_OS}" MATCHES "Darwin|iPhone")
 		file(GLOB_RECURSE src_platform_list "${src_folder}/*.m*")
 	endif()
 endif()

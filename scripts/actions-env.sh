@@ -31,6 +31,8 @@ fi
 if [[ "$HOST_OS" == "Darwin" ]]; then
     if [[ "$BUILD_TARGET" == "iphone" ]]; then
         BUILD_OS="iPhone"
+    elif [[ "$BUILD_TARGET" == "iphone-simulator" ]]; then
+        BUILD_OS="iPhoneSimulator"
     else
         BUILD_OS="Darwin"
         BUILD_TARGET="darwin"

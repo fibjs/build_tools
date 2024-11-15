@@ -257,6 +257,8 @@ gethostarch(HOST_ARCH)
 
 if("${BUILD_OS}" STREQUAL "iphone")
     set(BUILD_OS "iPhone")
+elseif("${BUILD_OS}" STREQUAL "iphone-simulator")
+    set(BUILD_OS "iPhoneSimulator")
 else()
     set(BUILD_OS ${CMAKE_HOST_SYSTEM_NAME})
 endif()

@@ -124,31 +124,41 @@ elseif("${BUILD_OS}" STREQUAL "Windows")
     elseif(${BUILD_TYPE} STREQUAL "release")
         set(flags "${flags} -Xclang --dependent-lib=libcmt")
     endif()
-elseif("${BUILD_OS}" STREQUAL "iPhone")
+elseif("${BUILD_OS}" MATCHES "iPhone")
     set(flags "${flags} -Wno-nullability-completeness -miphoneos-version-min=12.0")
-    set(link_flags "${link_flags} -miphoneos-version-min=12.0 -framework Foundation")
+    set(link_flags "${link_flags} -miphoneos-version-min=12.0 -framework Foundation -framework UIKit -framework WebKit")
 
-    if(${BUILD_ARCH} STREQUAL "x64")
+    if("${BUILD_OS}" STREQUAL "iPhoneSimulator")
         execute_process(
             COMMAND xcrun --sdk iphonesimulator --show-sdk-path
             OUTPUT_VARIABLE CMAKE_OSX_SYSROOT
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
 
-        set(CMAKE_OSX_ARCHITECTURES "x86_64")
-        set(BUILD_TARGET "x86_64-apple-ios-simulator")
-    elseif(${BUILD_ARCH} STREQUAL "arm64")
+        if(${BUILD_ARCH} STREQUAL "x64")
+            set(CMAKE_OSX_ARCHITECTURES "x86_64")
+            set(BUILD_TARGET "x86_64-apple-ios-simulator")
+        elseif(${BUILD_ARCH} STREQUAL "arm64")
+            set(CMAKE_OSX_ARCHITECTURES "arm64")
+            set(BUILD_TARGET "aarch64-apple-ios-simulator")
+        else()
+            message(FATAL_ERROR "Unsupported target architecture {${BUILD_ARCH}}.")
+        endif()
+    else()
         execute_process(
             COMMAND xcrun --sdk iphoneos --show-sdk-path
             OUTPUT_VARIABLE CMAKE_OSX_SYSROOT
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
 
-        set(CMAKE_OSX_ARCHITECTURES "arm64")
-        set(BUILD_TARGET "aarch64-apple-ios")
-    else()
-        message(FATAL_ERROR "Unsupported target architecture {${BUILD_ARCH}}.")
+        if(${BUILD_ARCH} STREQUAL "arm64")
+            set(CMAKE_OSX_ARCHITECTURES "arm64")
+            set(BUILD_TARGET "aarch64-apple-ios")
+        else()
+            message(FATAL_ERROR "Unsupported target architecture {${BUILD_ARCH}}.")
+        endif()
     endif()
+
 
     set(CMAKE_OSX_DEPLOYMENT_TARGET "" CACHE STRING "Force unset of the deployment target for iOS" FORCE)
 
