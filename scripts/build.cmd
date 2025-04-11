@@ -2,6 +2,17 @@
 
 SETLOCAL ENABLEDELAYEDEXPANSION
 
+REM Get default architecture
+if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
+    set DEFAULT_ARCH=x64
+) else if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
+    set DEFAULT_ARCH=arm64
+) else (
+    set DEFAULT_ARCH=ia32
+)
+
+set BUILD_ARCH=%DEFAULT_ARCH%
+
 set ARG_ERROR=no
 
 for %%a in (%*) do (
