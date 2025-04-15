@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.10)
+
 macro(clean_clang_flags)
     set(variables
         CMAKE_C_FLAGS_DEBUG

@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.10)
+
 function(usechalk)
     string(ASCII 27 Esc)
     set(ChalkColorReset     "${Esc}[m"      PARENT_SCOPE)

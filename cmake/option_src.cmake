@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.10)
+
 if(NOT DEFINED src_folder)
 	set(src_folder "src")
 endif()

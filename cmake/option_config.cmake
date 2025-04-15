@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.10)
 
 function(check_glibc func next flag)
     set(vers 2.29 2.28 2.27 2.17 2.14 2.4 2.2.5 2.2 2.0)

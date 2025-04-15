@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.10)
+
 if(NOT WIN32)
     if("$ENV{CC}" STREQUAL "")
         if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Linux")

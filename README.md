@@ -59,7 +59,7 @@ Add one CMakeLists.txt on your project. like [examples/hello/CMakeLists.txt](./e
 To build one **static** Library, include `cmake/Library.cmake`
 
 ```CMake
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 
 include(<built_tool_path>/cmake/Library.cmake)
 ```
@@ -69,7 +69,7 @@ Or put one CMakeLists.txt on project_root's test directory, like [examples/hello
 To build one **test** executation, include `cmake/LibraryTest.cmake`
 
 ```CMake
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 
 include(<built_tool_path>/cmake/LibraryTest.cmake)
 ```

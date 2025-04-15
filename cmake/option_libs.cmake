@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.10)
+
 get_filename_component(BIN_PATH ${CMAKE_CURRENT_BINARY_DIR} DIRECTORY)
 get_filename_component(BIN_PATH ${BIN_PATH} DIRECTORY)
 get_filename_component(BIN_PATH ${BIN_PATH} DIRECTORY)

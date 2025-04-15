@@ -1,4 +1,5 @@
-# get host's architecture in cmake script mode
+cmake_minimum_required(VERSION 3.10)
+
 function(gethostarch RETVAL)
     if("${${RETVAL}}" STREQUAL "")
         if("${BUILD_OS}" STREQUAL "Windows")

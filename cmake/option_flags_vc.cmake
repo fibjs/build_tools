@@ -1,4 +1,5 @@
-# dirty code for replace compilation options of MSVC
+cmake_minimum_required(VERSION 3.10)
+
 macro(configure_msvc_runtime)
     set(variables
         CMAKE_C_FLAGS

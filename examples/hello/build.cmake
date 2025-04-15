@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.10)
 
 include(../../cmake-scripts/get_env.cmake)
 set(WORK_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/output")
