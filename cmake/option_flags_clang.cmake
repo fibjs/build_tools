@@ -226,5 +226,6 @@ elseif(${BUILD_TYPE} STREQUAL "debug")
 
     if("${BUILD_OS}" STREQUAL "Windows")
         add_definitions(-D_DEBUG)
+        set(flags "${flags} -w")
     endif()
 endif()
