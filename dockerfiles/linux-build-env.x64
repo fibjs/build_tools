@@ -3,7 +3,7 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get upgrade -y && apt-get install sudo curl -y && \
-    apt-get install make cmake ccache git clang-12 -y && \
+    apt-get install make cmake ccache git clang-18 -y && \
     apt-get install libgtk-3-dev libwebkit2gtk-4.0-dev -y && apt-get install qemu-user-static -y
 
 RUN chmod 777 /root
