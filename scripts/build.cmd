@@ -3,9 +3,16 @@
 SETLOCAL ENABLEDELAYEDEXPANSION
 
 REM Get default architecture
-if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
+REM On Windows, when running under WoW64 (32-bit process on 64-bit OS),
+REM PROCESSOR_ARCHITECTURE returns the emulated architecture (e.g., x86),
+REM while PROCESSOR_ARCHITEW6432 returns the real host architecture.
+REM We need to check PROCESSOR_ARCHITEW6432 first to get the true host arch.
+set HOST_ARCH=%PROCESSOR_ARCHITEW6432%
+if "%HOST_ARCH%"=="" set HOST_ARCH=%PROCESSOR_ARCHITECTURE%
+
+if "%HOST_ARCH%"=="AMD64" (
     set DEFAULT_ARCH=x64
-) else if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
+) else if "%HOST_ARCH%"=="ARM64" (
     set DEFAULT_ARCH=arm64
 ) else (
     set DEFAULT_ARCH=ia32

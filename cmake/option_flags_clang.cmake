@@ -218,6 +218,7 @@ elseif(${BUILD_TYPE} STREQUAL "debug")
 
     if(${BUILD_ARCH} STREQUAL "mips64")
         set(flags "${flags} -mxgot")
+        set(link_flags "${link_flags} -mxgot")
     endif()
 
     set(flags "${flags} -Wall -Wno-unused-function")

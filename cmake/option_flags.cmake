@@ -3,7 +3,14 @@ cmake_minimum_required(VERSION 3.10)
 function(gethostarch RETVAL)
     if("${${RETVAL}}" STREQUAL "")
         if("${BUILD_OS}" STREQUAL "Windows")
-            set(HOST_SYSTEM_PROCESSOR x64)
+            # On Windows, when running under WoW64 (32-bit process on 64-bit OS),
+            # PROCESSOR_ARCHITECTURE returns the emulated architecture (e.g., x86),
+            # while PROCESSOR_ARCHITEW6432 returns the real host architecture.
+            # We need to check PROCESSOR_ARCHITEW6432 first to get the true host arch.
+            set(HOST_SYSTEM_PROCESSOR $ENV{PROCESSOR_ARCHITEW6432})
+            if("${HOST_SYSTEM_PROCESSOR}" STREQUAL "")
+                set(HOST_SYSTEM_PROCESSOR $ENV{PROCESSOR_ARCHITECTURE})
+            endif()
         else()
             execute_process(
                 COMMAND uname -m
@@ -18,7 +25,7 @@ function(gethostarch RETVAL)
             set(${RETVAL} x64 PARENT_SCOPE)
         elseif(${HOST_SYSTEM_PROCESSOR} MATCHES "^(armv7)|(armv7s)|(armv7l)$")
             set(${RETVAL} arm PARENT_SCOPE)
-        elseif(${HOST_SYSTEM_PROCESSOR} MATCHES "^(aarch64)|(arm64)$")
+        elseif(${HOST_SYSTEM_PROCESSOR} MATCHES "^(aarch64)|(arm64)|(ARM64)$")
             set(${RETVAL} arm64 PARENT_SCOPE)
         elseif(${HOST_SYSTEM_PROCESSOR} MATCHES "mips64")
             set(${RETVAL} mips64 PARENT_SCOPE)

@@ -26,6 +26,23 @@ if [[ "$HOST_OS" == "Linux" ]]; then
     sudo update-binfmts --install qemu-loongarch64 /usr/cross-tools/qemu-loongarch64 \
         --magic "\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x02\x01" \
         --mask "\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff"
+
+    sudo rm -rf \
+                "$AGENT_TOOLSDIRECTORY" \
+                /opt/ghc \
+                /opt/hostedtoolcache \
+                /opt/google/chrome \
+                /opt/microsoft/msedge \
+                /opt/microsoft/powershell \
+                /opt/pipx \
+                /usr/lib/mono \
+                /usr/local/julia* \
+                /usr/local/lib/android \
+                /usr/local/lib/node_modules \
+                /usr/local/share/chromium \
+                /usr/local/share/powershell \
+                /usr/share/dotnet \
+                /usr/share/swift
 fi
 
 if [[ "$HOST_OS" == "Darwin" ]]; then

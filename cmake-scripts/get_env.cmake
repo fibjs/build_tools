@@ -85,7 +85,14 @@ endfunction()
 function(gethostarch RETVAL)
     if("${${RETVAL}}" STREQUAL "")
         if(WIN32)
-            set(HOST_SYSTEM_PROCESSOR $ENV{PROCESSOR_ARCHITECTURE})
+            # On Windows, when running under WoW64 (32-bit process on 64-bit OS),
+            # PROCESSOR_ARCHITECTURE returns the emulated architecture (e.g., x86),
+            # while PROCESSOR_ARCHITEW6432 returns the real host architecture.
+            # We need to check PROCESSOR_ARCHITEW6432 first to get the true host arch.
+            set(HOST_SYSTEM_PROCESSOR $ENV{PROCESSOR_ARCHITEW6432})
+            if("${HOST_SYSTEM_PROCESSOR}" STREQUAL "")
+                set(HOST_SYSTEM_PROCESSOR $ENV{PROCESSOR_ARCHITECTURE})
+            endif()
         else()
             execute_process(
                 COMMAND uname -m
