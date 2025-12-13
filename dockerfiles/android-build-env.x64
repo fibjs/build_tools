@@ -1,6 +1,6 @@
 FROM fibjs/linux-build-env:x64
 
-RUN apt-get update && apt-get install -y unzip curl
+RUN apt-get update && apt-get install -y unzip curl patchelf
 
 ENV CROSS_TRIPLE=x86_64-linux-android
 ENV CROSS_ROOT=/usr/${CROSS_TRIPLE}
@@ -28,3 +28,20 @@ RUN mkdir -p /build && \
     rm -rf /build && \
     find ${CROSS_ROOT} -exec chmod a+r '{}' \; && \
     find ${CROSS_ROOT} -executable -exec chmod a+x '{}' \;
+
+# Setup Android dynamic linker environment for running x86_64 binaries
+# Download linker64 and libs from Android emulator system image
+RUN apt-get install -y p7zip-full && \
+    mkdir -p /build && cd /build && \
+    curl -LO https://dl.google.com/android/repository/sys-img/android/x86_64-27_r01.zip && \
+    unzip x86_64-27_r01.zip && \
+    7z x x86_64/system.img -osystem_extract && \
+    mkdir -p /system/bin /system/lib64 && \
+    cp system_extract/bin/linker64 /system/bin/ && \
+    cp system_extract/lib64/libc.so /system/lib64/ && \
+    cp system_extract/lib64/libdl.so /system/lib64/ && \
+    cp system_extract/lib64/libm.so /system/lib64/ && \
+    cp system_extract/lib64/liblog.so /system/lib64/ && \
+    cp system_extract/lib64/libstdc++.so /system/lib64/ 2>/dev/null || true && \
+    chmod +x /system/bin/linker64 && \
+    cd / && rm -rf /build
