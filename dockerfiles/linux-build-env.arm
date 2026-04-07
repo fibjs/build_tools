@@ -1,4 +1,10 @@
 FROM fibjs/linux-build-env:x64
 
-RUN apt-get install g++-arm-linux-gnueabihf -y
+RUN apt-get install g++-arm-linux-gnueabihf -y && \
+    dpkg --add-architecture armhf && \
+    sed -i 's|^deb http://archive.ubuntu.com|deb [arch=amd64] http://archive.ubuntu.com|g' /etc/apt/sources.list && \
+    sed -i 's|^deb http://security.ubuntu.com|deb [arch=amd64] http://security.ubuntu.com|g' /etc/apt/sources.list && \
+    echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports focal main universe" >> /etc/apt/sources.list && \
+    echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports focal-updates main universe" >> /etc/apt/sources.list && \
+    apt-get update && apt-get install libedit-dev:armhf -y
 ENV QEMU_LD_PREFIX="/usr/arm-linux-gnueabihf"

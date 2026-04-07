@@ -1,3 +1,5 @@
 FROM fibjs/linux-build-env:x64
 
-RUN apt-get install g++-i686-linux-gnu -y
+RUN apt-get install g++-i686-linux-gnu -y && \
+    dpkg --add-architecture i386 && \
+    apt-get update && apt-get install libedit-dev:i386 -y

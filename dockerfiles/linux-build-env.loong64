@@ -12,11 +12,33 @@ RUN curl -o qemu-loongarch64 --retry 5 -LO https://github.com/loongson/build-too
 #     --magic "\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x02\x01" \
 #     --mask "\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff"
 
-ENV AS=/usr/cross-tools/bin/loongarch64-unknown-linux-gnu-as \
+ENV HOST=loongarch64-unknown-linux-gnu \
+    AS=/usr/cross-tools/bin/loongarch64-unknown-linux-gnu-as \
     AR=/usr/cross-tools/bin/loongarch64-unknown-linux-gnu-ar \
     CC=/usr/cross-tools/bin/loongarch64-unknown-linux-gnu-gcc \
     CPP=/usr/cross-tools/bin/loongarch64-unknown-linux-gnu-cpp \
     CXX=/usr/cross-tools/bin/loongarch64-unknown-linux-gnu-g++ \
     LD=/usr/cross-tools/bin/loongarch64-unknown-linux-gnu-ld
+
+RUN cd /tmp && \
+    curl -sLO https://ftp.gnu.org/gnu/ncurses/ncurses-6.4.tar.gz && \
+    tar xzf ncurses-6.4.tar.gz && \
+    cd ncurses-6.4 && \
+    ./configure --host=${HOST} --prefix=/usr/cross-tools/target/usr \
+        --without-debug --without-ada --without-manpages --without-progs --without-tests \
+        --disable-widec --with-shared --enable-pc-files \
+        --includedir=/usr/cross-tools/target/usr/include && \
+    make -j$(nproc) && make install && \
+    cd /tmp && \
+    curl -sLO https://thrysoee.dk/editline/libedit-20230828-3.1.tar.gz && \
+    tar xzf libedit-20230828-3.1.tar.gz && \
+    cd libedit-20230828-3.1 && \
+    CFLAGS="-I/usr/cross-tools/target/usr/include -I/usr/cross-tools/target/usr/include/ncurses" \
+    CPPFLAGS="-I/usr/cross-tools/target/usr/include -I/usr/cross-tools/target/usr/include/ncurses" \
+    LDFLAGS="-L/usr/cross-tools/target/usr/lib" \
+    PKG_CONFIG_PATH="/usr/cross-tools/target/usr/lib/pkgconfig" \
+        ./configure --host=${HOST} --prefix=/usr/cross-tools/target/usr && \
+    make -j$(nproc) && make install && \
+    cd /tmp && rm -rf ncurses-6.4* libedit-20230828-3.1*
 
 ENV QEMU_LD_PREFIX="/usr/cross-tools/target"

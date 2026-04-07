@@ -1,4 +1,24 @@
 FROM fibjs/linux-build-env:x64
 
-RUN apt-get install g++-mips64el-linux-gnuabi64 -y
+RUN apt-get install g++-mips64el-linux-gnuabi64 -y && \
+    HOST=mips64el-linux-gnuabi64 && \
+    SYSROOT=/usr/${HOST} && \
+    cd /tmp && \
+    curl -sLO https://ftp.gnu.org/gnu/ncurses/ncurses-6.4.tar.gz && \
+    tar xzf ncurses-6.4.tar.gz && \
+    cd ncurses-6.4 && \
+    CC=${HOST}-gcc CXX=${HOST}-g++ \
+        ./configure --host=${HOST} --prefix=${SYSROOT} \
+        --without-debug --without-ada --without-manpages --without-progs --without-tests \
+        --disable-widec --with-shared --enable-pc-files && \
+    make -j$(nproc) && make install && \
+    cd /tmp && \
+    curl -sLO https://thrysoee.dk/editline/libedit-20230828-3.1.tar.gz && \
+    tar xzf libedit-20230828-3.1.tar.gz && \
+    cd libedit-20230828-3.1 && \
+    CC=${HOST}-gcc CFLAGS="-I${SYSROOT}/include" LDFLAGS="-L${SYSROOT}/lib" \
+    PKG_CONFIG_PATH="${SYSROOT}/lib/pkgconfig" \
+        ./configure --host=${HOST} --prefix=${SYSROOT} && \
+    make -j$(nproc) && make install && \
+    cd /tmp && rm -rf ncurses-6.4* libedit-20230828-3.1*
 ENV QEMU_LD_PREFIX="/usr/mips64el-linux-gnuabi64"

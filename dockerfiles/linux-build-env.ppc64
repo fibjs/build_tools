@@ -1,4 +1,10 @@
 FROM fibjs/linux-build-env:x64
 
-RUN apt-get install g++-powerpc64le-linux-gnu -y
+RUN apt-get install g++-powerpc64le-linux-gnu -y && \
+    dpkg --add-architecture ppc64el && \
+    sed -i 's|^deb http://archive.ubuntu.com|deb [arch=amd64] http://archive.ubuntu.com|g' /etc/apt/sources.list && \
+    sed -i 's|^deb http://security.ubuntu.com|deb [arch=amd64] http://security.ubuntu.com|g' /etc/apt/sources.list && \
+    echo "deb [arch=ppc64el] http://ports.ubuntu.com/ubuntu-ports focal main universe" >> /etc/apt/sources.list && \
+    echo "deb [arch=ppc64el] http://ports.ubuntu.com/ubuntu-ports focal-updates main universe" >> /etc/apt/sources.list && \
+    apt-get update && apt-get install libedit-dev:ppc64el -y
 ENV QEMU_LD_PREFIX="/usr/powerpc64le-linux-gnu"
