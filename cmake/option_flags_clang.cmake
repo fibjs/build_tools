@@ -216,9 +216,29 @@ if(${BUILD_TYPE} STREQUAL "release")
 elseif(${BUILD_TYPE} STREQUAL "debug")
     set(flags "${flags} -g1 -O0")
 
+    # Debug binaries are run by the CI inside the cross build images, and not
+    # every image ships the target's shared C++ runtime (the loong64ow image
+    # keeps libstdc++ outside the target rootfs). Link it statically like the
+    # release build does so the test binaries stay self contained.
+    if(NOT "${BUILD_OS}" STREQUAL "Windows")
+        set(link_flags "${link_flags} -static-libstdc++")
+
+        if(NOT "${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Darwin")
+            set(link_flags "${link_flags} -static-libgcc")
+        endif()
+    endif()
+
     if(${BUILD_ARCH} STREQUAL "mips64")
-        set(flags "${flags} -mxgot")
-        set(link_flags "${link_flags} -mxgot")
+        # mips64 limits how far apart a GOT entry and the code using it may be,
+        # and an -O0 build of v8 keeps every global reference, so linking the
+        # test binaries fails with
+        #   relocation truncated to fit: R_MIPS_GOT_PAGE
+        # even though -mxgot (multiple GOTs) is in use. -O1 cuts the number of
+        # distinct GOT entries per object by more than half, and throwing away
+        # the sections the binary never reaches (as the release build does)
+        # keeps the GOT within reach of every input object.
+        set(flags "${flags} -mxgot -O1")
+        set(link_flags "${link_flags} -mxgot -Wl,--gc-sections")
     endif()
 
     set(flags "${flags} -Wall -Wno-unused-function")
