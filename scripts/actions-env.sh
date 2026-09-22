@@ -27,6 +27,28 @@ if [[ "$HOST_OS" == "Linux" ]]; then
         --magic "\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x02\x01" \
         --mask "\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff"
 
+    # The handlers from the distribution's qemu-user-static carry fix_binary (F):
+    # the kernel opens the interpreter when the handler is registered, so the
+    # qemu installed in the build environment image is never used and every
+    # emulated guest is run by the runner's own qemu instead (6.2 on
+    # ubuntu-22.04).  That qemu loops forever in V8's parser hash table on the
+    # android/arm64 suite - it hangs right after the "path" suite header - while
+    # the 7.2 pinned into the image does not.  For that job, re-register the
+    # handler without F: the interpreter path is then resolved inside the
+    # container, where the pinned qemu lives.  Children started through
+    # process.execPath go through binfmt as well, so this covers them too, which
+    # invoking qemu explicitly from test.sh would not.
+    if [[ "$BUILD_TARGET" == "android" && "$BUILD_ARCH" == "arm64" ]]; then
+        binfmt=/proc/sys/fs/binfmt_misc/qemu-aarch64
+        if [[ -e "$binfmt" ]]; then
+            magic=$(sed -n 's/^magic //p' "$binfmt" | sed 's/../\\x&/g')
+            mask=$(sed -n 's/^mask //p' "$binfmt" | sed 's/../\\x&/g')
+            sudo sh -c "echo -1 > $binfmt"
+            sudo sh -c "printf '%s' ':qemu-aarch64:M:0:$magic:$mask:/usr/bin/qemu-aarch64-static:' > /proc/sys/fs/binfmt_misc/register"
+            cat "$binfmt"
+        fi
+    fi
+
     sudo rm -rf \
                 "$AGENT_TOOLSDIRECTORY" \
                 /opt/ghc \

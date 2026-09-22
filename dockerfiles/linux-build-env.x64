@@ -7,5 +7,19 @@ RUN apt-get update && apt-get upgrade -y && apt-get install sudo curl -y && \
     apt-get install libgtk-3-dev -y && apt-get install qemu-user-static -y && \
     apt-get install libedit-dev -y
 
+# The emulator of the ubuntu 20.04 package is 4.2.1, which loops forever in
+# V8's parser hash table on the android/arm64 test suite (see
+# actions-env.sh: the same job re-registers the binfmt handler so that this
+# qemu, and not the runner's, is the one that runs).  Keep the package for
+# update-binfmts and the /usr/share/binfmts definitions, but pin the emulators
+# themselves to a version that does not have that bug.
+RUN set -eux; \
+    for a in aarch64 arm mips64el ppc64le riscv64; do \
+        curl -fsSL -o /usr/bin/qemu-$a-static \
+            https://github.com/multiarch/qemu-user-static/releases/download/v7.2.0-1/qemu-$a-static; \
+        chmod +x /usr/bin/qemu-$a-static; \
+        /usr/bin/qemu-$a-static --version | head -1; \
+    done
+
 RUN chmod 777 /root
 RUN echo "adduser \$1 --uid \$2 --disabled-password --no-create-home --gecos '' -q" > /usr/build_user.sh
