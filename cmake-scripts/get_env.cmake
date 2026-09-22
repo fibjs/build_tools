@@ -155,7 +155,7 @@ function(build src out name)
         execute_process(WORKING_DIRECTORY "${OUT_PATH}"
             OUTPUT_FILE CMake.log 
             COMMAND ${CMAKE_COMMAND}
-                -Wno-dev
+                -Wno-author
                 -DBUILD_OS=${BUILD_OS}
                 -DBUILD_ARCH=${BUILD_ARCH}
                 -DBUILD_TYPE=${BUILD_TYPE}
@@ -182,7 +182,7 @@ function(build src out name)
         execute_process(WORKING_DIRECTORY "${OUT_PATH}"
             OUTPUT_FILE CMake.log 
             COMMAND ${CMAKE_COMMAND}
-                -Wno-dev
+                -Wno-author
                 -DBUILD_OS=${BUILD_OS}
                 -DBUILD_ARCH=${BUILD_ARCH}
                 -DBUILD_TYPE=${BUILD_TYPE}
