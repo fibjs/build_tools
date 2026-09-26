@@ -1,5 +1,31 @@
 cmake_minimum_required(VERSION 3.10)
 
+# ============================================================================
+# fibjs build configuration
+#
+# Single place that computes the build environment.  It is included by the
+# top-level CMakeLists.txt (project mode) and by the build scripts through
+# cmake-scripts/dist_dirname.cmake (script mode, only to learn DIST_DIRNAME),
+# and it is idempotent, so a library may also include it directly.
+#
+# Inputs (cache entries / -D):
+#   BUILD_OS       linux | alpine | android | win32 | darwin | iphone |
+#                  iphone-simulator   (default: host system name)
+#   BUILD_ARCH     x64 | ia32 | arm | arm64 | mips64 | ppc64 | riscv64 |
+#                  loong64 | loong64ow | s390x  (default: host / compiler target)
+#   BUILD_TYPE     release | debug               (default: release)
+#   BUILD_JOBS     parallel jobs                 (default: host cpu count)
+#   FIBJS_BIN_DIR  output directory for libraries and executables
+#                  (default: <build dir>/../bin/<OS>_<ARCH>_<TYPE>)
+#
+# Outputs:
+#   BUILD_OS, BUILD_ARCH, BUILD_TYPE, HOST_ARCH, DIST_DIRNAME, BUILD_JOBS,
+#   FIBJS_BIN_DIR
+# ============================================================================
+
+if(NOT DEFINED FIBJS_CONFIG_LOADED)
+set(FIBJS_CONFIG_LOADED 1)
+
 function(usechalk)
     string(ASCII 27 Esc)
     set(ChalkColorReset     "${Esc}[m"      PARENT_SCOPE)
@@ -31,7 +57,7 @@ function(chalklog)
     if("${ChalkColorReset}" STREQUAL "")
         usechalk()
     endif()
-    
+
     if(${ARGC} EQUAL 3)
         set(type "${ARGV0}")
         set(msg "${ARGV1}")
@@ -49,7 +75,7 @@ function(chalklog)
     if("${type}" STREQUAL "")
         set(type "info")
     endif()
-    
+
     if("${type}" STREQUAL "info")
         set(coloredPrefix "${prefix}")
     elseif("${type}" STREQUAL "success")
@@ -125,86 +151,6 @@ function(gethostarch RETVAL)
     endif()
 endfunction()
 
-function(build src out name)
-    set(OUT_PATH "${out}/out/${DIST_DIRNAME}/${name}")
-    file(MAKE_DIRECTORY "${OUT_PATH}")
-
-    if(NOT DEFINED BUILD_TYPE)
-        message(FATAL_ERROR "[get_env::build] BUILD_TYPE haven't been set, check your input.")
-    endif()
-
-    if("${BUILD_OS}" STREQUAL "Windows")
-        if(${BUILD_ARCH} STREQUAL "x64")
-            set(TargetArch "x64")
-        elseif(${BUILD_ARCH} STREQUAL "ia32")
-            set(TargetArch "Win32")
-        elseif(${BUILD_ARCH} STREQUAL "arm64")
-            set(TargetArch "ARM64")
-        elseif(${BUILD_ARCH} STREQUAL "arm")
-            set(TargetArch "ARM")
-        endif()
-
-        if("${BUILD_WITH_MSVC}" STREQUAL "")
-            set(MSBUILD_BUILD_TARGET "-T ClangCL")
-        endif()
-        set(MSBUILD_PARALLEL_JOBS "-j ${BUILD_JOBS}")
-
-        # message("[debug] build:: MSBUILD_BUILD_TARGET is ${MSBUILD_BUILD_TARGET}")
-        # message("[debug] build:: MSBUILD_PARALLEL_JOBS is ${MSBUILD_PARALLEL_JOBS}")
-
-        execute_process(WORKING_DIRECTORY "${OUT_PATH}"
-            OUTPUT_FILE CMake.log 
-            COMMAND ${CMAKE_COMMAND}
-                -Wno-author
-                -DBUILD_OS=${BUILD_OS}
-                -DBUILD_ARCH=${BUILD_ARCH}
-                -DBUILD_TYPE=${BUILD_TYPE}
-                ${MSBUILD_BUILD_TARGET}
-                -A ${TargetArch}
-                "${src}"
-            RESULT_VARIABLE STATUS
-        )
-
-        if(NOT STATUS EQUAL 0)
-            message(FATAL_ERROR "[build] exit code: ${STATUS}")
-        endif()
-
-        execute_process(WORKING_DIRECTORY "${OUT_PATH}"
-            COMMAND ${CMAKE_COMMAND} 
-            --build ./
-            ${MSBUILD_PARALLEL_JOBS}
-            --config ${BUILD_TYPE}
-            -- /nologo /verbosity:minimal
-            /p:CL_MPcount=${BUILD_JOBS}
-            RESULT_VARIABLE STATUS
-        )
-    else()
-        execute_process(WORKING_DIRECTORY "${OUT_PATH}"
-            OUTPUT_FILE CMake.log 
-            COMMAND ${CMAKE_COMMAND}
-                -Wno-author
-                -DBUILD_OS=${BUILD_OS}
-                -DBUILD_ARCH=${BUILD_ARCH}
-                -DBUILD_TYPE=${BUILD_TYPE}
-                "${src}"
-            RESULT_VARIABLE STATUS
-        )
-
-        if(NOT STATUS EQUAL 0)
-            message(FATAL_ERROR "[build] exit code: ${STATUS}")
-        endif()
-        
-        execute_process(WORKING_DIRECTORY "${OUT_PATH}"
-            COMMAND ${CMAKE_COMMAND} --build . -- -j${BUILD_JOBS}
-            RESULT_VARIABLE STATUS
-        )
-    endif()
-
-    if(NOT STATUS EQUAL 0)
-        message(FATAL_ERROR "[build] exit code: ${STATUS}")
-    endif()
-endfunction()
-
 function(find_vs v1 v2)
     while(v1 LESS v2 AND "${VS_INSTALLPATH}" STREQUAL "")
         MATH(EXPR v3 "${v2}-1")
@@ -232,8 +178,10 @@ function(prepare_platform)
             endif()
 
             chalklog("success" "PROGRAM_FILES_X86 is ${PROGRAM_FILES_X86}" "[win32]")
-            
-            find_vs(16, 18)
+
+            # Searched from the newest supported Visual Studio downwards:
+            # 2022 (17) and 2026 (18) are both covered.
+            find_vs(16, 21)
 
             if("${VS_INSTALLPATH}" STREQUAL "" OR NOT EXISTS "${VS_INSTALLPATH}\\VC")
                 chalklog("error" "make sure you have installed vs.net with vc runtime\n" "[win32]")
@@ -257,11 +205,21 @@ function(rimraf TARGET)
     endif()
 endfunction()
 
+# ----------------------------------------------------------------------------
+# platform / arch / type
+# ----------------------------------------------------------------------------
+
 gethostname()
 
 include(ProcessorCount)
 
-prepare_platform()
+# prepare_platform() locates the Visual Studio toolchain so that project() can
+# use clang-cl; a script-mode run (cmake -P, e.g. the dist directory helper) has
+# no project and must not depend on vswhere.
+if(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
+    prepare_platform()
+endif()
+
 gethostarch(HOST_ARCH)
 
 if("${BUILD_OS}" STREQUAL "iphone")
@@ -272,7 +230,7 @@ else()
     set(BUILD_OS ${CMAKE_HOST_SYSTEM_NAME})
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/get_compiler.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../cmake-scripts/get_compiler.cmake)
 
 if("${BUILD_TYPE}" STREQUAL "")
     set(BUILD_TYPE release)
@@ -287,6 +245,30 @@ endif()
 
 set(ENV{CLICOLOR_FORCE} 1)
 
+# ----------------------------------------------------------------------------
+# output layout
+#
+# Everything (static libraries, executables, tests) is written to a single
+# directory so that consumers can link by path as well as by target name:
+#
+#     <WORK_ROOT>/out/<DIST_DIRNAME>/   build tree (one subdirectory per target)
+#     <WORK_ROOT>/bin/<DIST_DIRNAME>/   artifacts
+#
+# FIBJS_BIN_DIR may be preset by the caller (script-mode driver or the
+# top-level project) when the build tree lives outside of the default layout.
+# ----------------------------------------------------------------------------
+
+if("${FIBJS_BIN_DIR}" STREQUAL "" AND NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
+    # project mode.  The default build tree is <work root>/out/<dist>, so the
+    # artifacts belong to <work root>/bin/<dist>.  Callers that use a different
+    # -B location pass -DFIBJS_BIN_DIR explicitly (build_tools/scripts/build).
+    set(FIBJS_BIN_DIR "${CMAKE_BINARY_DIR}/../../bin/${DIST_DIRNAME}")
+endif()
+
+if(NOT "${FIBJS_BIN_DIR}" STREQUAL "")
+    get_filename_component(FIBJS_BIN_DIR "${FIBJS_BIN_DIR}" ABSOLUTE)
+endif()
+
 message("")
 message("HOST_OS is ${CMAKE_HOST_SYSTEM_NAME}")
 message("HOST_ARCH is ${HOST_ARCH}")
@@ -294,4 +276,9 @@ message("BUILD_OS is ${BUILD_OS}")
 message("BUILD_ARCH is ${BUILD_ARCH}")
 message("BUILD_TYPE is ${BUILD_TYPE}")
 message("BUILD_JOBS is ${BUILD_JOBS}")
+if(NOT "${FIBJS_BIN_DIR}" STREQUAL "")
+    message("FIBJS_BIN_DIR is ${FIBJS_BIN_DIR}")
+endif()
 message("")
+
+endif()

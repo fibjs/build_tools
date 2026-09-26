@@ -16,10 +16,17 @@ if(NOT DEFINED test_libs)
 	set(test_libs "")
 endif()
 
-set(libs ${libname} ${libs} ${test_libs})
+# Note: the variable is intentionally local - "libs" holds the full vendored
+# library list in the parent scope of the unified build, and inheriting it here
+# would link every library into every test.
+set(test_link_libs ${libname} ${test_libs})
 
-foreach(lib ${libs})
-	target_link_libraries(${name} "${BIN_PATH}/${CMAKE_STATIC_LIBRARY_PREFIX}${lib}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+foreach(lib ${test_link_libs})
+	if(TARGET ${lib})
+		target_link_libraries(${name} ${lib})
+	else()
+		target_link_libraries(${name} "${BIN_PATH}/${CMAKE_STATIC_LIBRARY_PREFIX}${lib}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+	endif()
 endforeach()
 
 setup_result_library(${name})

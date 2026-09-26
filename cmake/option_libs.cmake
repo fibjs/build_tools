@@ -1,9 +1,19 @@
 cmake_minimum_required(VERSION 3.10)
 
-get_filename_component(BIN_PATH ${CMAKE_CURRENT_BINARY_DIR} DIRECTORY)
-get_filename_component(BIN_PATH ${BIN_PATH} DIRECTORY)
-get_filename_component(BIN_PATH ${BIN_PATH} DIRECTORY)
-set(BIN_PATH "${BIN_PATH}/bin/${BUILD_OS}_${BUILD_ARCH}_${BUILD_TYPE}")
+# BIN_PATH is the shared artifact directory.  It is normally provided by
+# cmake/config.cmake (FIBJS_BIN_DIR, derived from the build tree) or by the
+# script-mode driver (-DFIBJS_BIN_DIR=<work root>/bin/<dist>).
+#
+# The fallback below keeps a directly configured single library working:
+# it assumes the historical <work root>/out/<dist>/<name> build tree.
+if("${FIBJS_BIN_DIR}" STREQUAL "")
+    get_filename_component(BIN_PATH ${CMAKE_CURRENT_BINARY_DIR} DIRECTORY)
+    get_filename_component(BIN_PATH ${BIN_PATH} DIRECTORY)
+    get_filename_component(BIN_PATH ${BIN_PATH} DIRECTORY)
+    set(BIN_PATH "${BIN_PATH}/bin/${BUILD_OS}_${BUILD_ARCH}_${BUILD_TYPE}")
+else()
+    set(BIN_PATH "${FIBJS_BIN_DIR}")
+endif()
 
 set(LIBRARY_OUTPUT_PATH "${BIN_PATH}")
 set(EXECUTABLE_OUTPUT_PATH "${BIN_PATH}")

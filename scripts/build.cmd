@@ -74,7 +74,48 @@ for %%a in (%*) do (
     )
 )
 
-cmake -DBUILD_ARCH=%BUILD_ARCH% -DBUILD_TYPE=%BUILD_TYPE% -DBUILD_JOBS=%BUILD_JOBS% -DCLEAN_BUILD=%CLEAN_BUILD% -DBUILD_WITH_MSVC=%BUILD_WITH_MSVC% -P build.cmake
+if "%BUILD_TYPE%"=="" set BUILD_TYPE=release
+if "%BUILD_OS%"=="" set BUILD_OS=Windows
+if "%BUILD_JOBS%"=="" set BUILD_JOBS=%NUMBER_OF_PROCESSORS%
+
+set DIST_DIRNAME=%BUILD_OS%_%BUILD_ARCH%_%BUILD_TYPE%
+set BUILD_DIR=%WORK_ROOT%\out\%DIST_DIRNAME%
+set BIN_DIR=%WORK_ROOT%\bin\%DIST_DIRNAME%
+
+REM ---------------------------------------------------------------------------
+REM Two kinds of repositories are supported:
+REM
+REM   * a single CMake project at the repository root (vender, fibjs): configured
+REM     and built in one pass below
+REM   * a repository that drives its own build from a script-mode build.cmake
+REM     (addon repositories such as fib-jieba, via fib-addon/build.cmake): that
+REM     script receives the same -D arguments as before
+REM ---------------------------------------------------------------------------
+
+if exist build.cmake (
+    cmake -DBUILD_ARCH=%BUILD_ARCH% -DBUILD_TYPE=%BUILD_TYPE% -DBUILD_OS=%BUILD_OS% -DCLEAN_BUILD=%CLEAN_BUILD% -DBUILD_JOBS=%BUILD_JOBS% -DBUILD_WITH_MSVC=%BUILD_WITH_MSVC% -DFIBJS_BIN_DIR=%BIN_DIR% -P build.cmake
+    goto finished
+)
+
+if "%BUILD_ARCH%"=="x64" set TargetArch=x64
+if "%BUILD_ARCH%"=="ia32" set TargetArch=Win32
+if "%BUILD_ARCH%"=="arm64" set TargetArch=ARM64
+
+set MSBUILD_BUILD_TARGET=-T ClangCL
+if NOT "%BUILD_WITH_MSVC%"=="" set MSBUILD_BUILD_TARGET=
+
+if "%CLEAN_BUILD%"=="true" (
+    if exist "%WORK_ROOT%\out" rmdir /s /q "%WORK_ROOT%\out"
+    if exist "%WORK_ROOT%\bin" rmdir /s /q "%WORK_ROOT%\bin"
+)
+
+if not exist "%BUILD_DIR%" mkdir "%BUILD_DIR%"
+
+cmake -Wno-author -DBUILD_OS=%BUILD_OS% -DBUILD_ARCH=%BUILD_ARCH% -DBUILD_TYPE=%BUILD_TYPE% -DBUILD_JOBS=%BUILD_JOBS% -DFIBJS_BIN_DIR=%BIN_DIR% %MSBUILD_BUILD_TARGET% -A %TargetArch% %BUILD_CMAKE_EXTRA_ARGS% -S . -B "%BUILD_DIR%"
+if ERRORLEVEL 1 goto finished
+
+cmake --build "%BUILD_DIR%" -j %BUILD_JOBS% --config %BUILD_TYPE% -- /nologo /verbosity:minimal /p:CL_MPcount=%BUILD_JOBS%
+if ERRORLEVEL 1 goto finished
 
 goto finished
 

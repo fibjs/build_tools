@@ -20,12 +20,24 @@ if [[ "$HOST_OS" == "Linux" ]]; then
 
     sudo apt update
 
-    sudo apt install qemu-user-static -y
+    # Registering the qemu handlers is best effort: newer runner images ship
+    # their own (or none at all) and the build images carry the emulators they
+    # need, so a missing package must not fail the job.  docker/setup-qemu-action
+    # is the reliable way to get the handlers for the cross architecture jobs.
+    sudo apt install qemu-user-static binfmt-support -y || \
+        echo "notice: qemu-user-static/binfmt-support are not available, relying on the runner's handlers"
 
-    sudo update-binfmts --enable
-    sudo update-binfmts --install qemu-loongarch64 /usr/cross-tools/qemu-loongarch64 \
-        --magic "\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x02\x01" \
-        --mask "\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff"
+    if command -v update-binfmts >/dev/null 2>&1; then
+        sudo update-binfmts --enable || true
+    fi
+
+    # The loongarch64 emulator lives inside the build image, not on the runner:
+    # register it only when it is actually present.
+    if command -v update-binfmts >/dev/null 2>&1 && [[ -e /usr/cross-tools/qemu-loongarch64 ]]; then
+        sudo update-binfmts --install qemu-loongarch64 /usr/cross-tools/qemu-loongarch64 \
+            --magic "\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x02\x01" \
+            --mask "\xff\xff\xff\xff\xff\xfe\xfe\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff"
+    fi
 
     # The handlers from the distribution's qemu-user-static carry fix_binary (F):
     # the kernel opens the interpreter when the handler is registered, so the

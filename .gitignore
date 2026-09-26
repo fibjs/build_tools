@@ -1,1 +1,8 @@
 examples/*/output
+
+# build trees and artifacts (build_tools/scripts/build)
+out/
+bin/
+
+# self test working directory (build_tools/tests/run.sh)
+tests/work/

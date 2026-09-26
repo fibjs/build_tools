@@ -12,45 +12,30 @@ To use build_tools for fibjs, you need install:
   - Linux: clang
   - MacOS: clang
 
-To explain how to use built_tools, we try to compile [examples/hello](./examples/hello/build.cmake).
+To explain how to use built_tools, we try to compile [examples/hello](./examples/hello/CMakeLists.txt).
 
 All `<built_tool_path>` in codes refers to this project's root path.
 
-### Workflow on CMake ccripts
+### Workflow
 
-We recommend CMake script-mode as build workflow, that is, instead of bash/sh/cmd/powershell, just use CMake script to
-drive your build.
+One CMake project per repository, configured and built in one pass:
 
-```CMake
-include(<built_tool_path>/cmake-scripts/get_env.cmake)
-
-set(WORK_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/output")
-
-set(BIN_ROOT "${WORK_ROOT}/bin")
-set(OUT_ROOT "${WORK_ROOT}/out")
-set(DIST_DIRNAME "${CMAKE_HOST_SYSTEM_NAME}_${BUILD_ARCH}_${BUILD_TYPE}")
-
-if("${CLEAN_BUILD}" STREQUAL "true")
-    rimraf(${BIN_ROOT}/${DIST_DIRNAME})
-    rimraf(${OUT_ROOT}/${DIST_DIRNAME})
-else()
-    set(OUT_PATH "${OUT_ROOT}/${DIST_DIRNAME}")
-
-    build("${CMAKE_CURRENT_SOURCE_DIR}" "${OUT_PATH}/hello")
-
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test")
-        build("${CMAKE_CURRENT_SOURCE_DIR}/test" "${OUT_PATH}/hello_test")
-    endif()
-endif()
+```bash
+cmake -DBUILD_ARCH=x64 -DBUILD_TYPE=release -DFIBJS_BIN_DIR=$PWD/bin \
+      -S . -B out/Linux_x64_release
+cmake --build out/Linux_x64_release -- -j8
 ```
 
-As of this script, `build` funciton is defined in `<built_tool_path>/cmake-scripts/get_env.cmake`.
+`cmake/config.cmake` detects the platform/architecture/type (overridable with
+`-DBUILD_OS`, `-DBUILD_ARCH`, `-DBUILD_TYPE`, `-DBUILD_JOBS`) and computes the
+artifact directory `FIBJS_BIN_DIR` (`bin/<OS>_<ARCH>_<TYPE>`).
 
-```CMake
-build(src_dirname, outputpath)
-```
+A top-level CMakeLists.txt adds the projects with `add_subdirectory` and calls
+`fibjs_config_target()` once for the whole tree (feature checks and the
+generated `glibc_config.h` / `std_config.h` / `gitinfo.h`).
 
-It tried to find `<src_dirname>/CMakeLists.txt` and run do cmake build against it. That is, you can customize by writing your own CMakeList.txt
+> The historical script-mode driver (`cmake-scripts/get_env.cmake` with the
+> `build()` function) was removed; builds are plain CMake projects now.
 
 ### Create CMakeLists.txt
 
@@ -76,13 +61,11 @@ include(<built_tool_path>/cmake/LibraryTest.cmake)
 
 ### Run CMake
 
+The example driver configures and builds the project in one pass:
+
 ```bash
-cmake -DBUILD_ARCH=x64\
-    -DBUILD_TYPE=release\
-    -DCLEAN_BUILD=""\
-    -DBUILD_JOBS=4\
-    -DBUILD_WITH_MSVC=1\
-    -P build.cmake
+cd examples/hello
+bash build x64 release -j4
 ```
 
 see more configuration on

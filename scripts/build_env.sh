@@ -309,41 +309,66 @@ function ensure_apt_packages() {
 
 # ===============================================================
 
+# The vender checkout is expected at <WORK_ROOT>/vender, so that out/ and bin/
+# always live next to the checkout.  That holds for both entry points:
+#   * fibjs (vender is a submodule):  <fibjs>/vender
+#   * vender CI (checked out via actions/checkout path: vender)
+# Repositories that merely vendor build_tools in a subdirectory (addon
+# repositories such as fib-jieba use <repo>/fib-addon/build_tools) keep the
+# historical layout: the outputs belong to the repository root, which is the
+# directory of the entry script.
+VENDER_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+export VENDER_ROOT
+
 if [[ "$WORK_ROOT" == "" ]]; then
-    WORK_ROOT=$(dirname "$0")
-    export WORK_ROOT=$(cd $WORK_ROOT && pwd)
-
-    args=$@
-
-    for i in $@; do
-        case $i in
-        ia32 | x64 | arm | arm64 | mips64 | ppc64 | s390x | riscv64 | loong64 | loong64ow)
-            BUILD_ARCH=$i
-            ;;
-        linux | alpine | android)
-            BUILD_DOCKER=$i
-            args="${args/$BUILD_DOCKER/}"
-            ;;
-        esac
-    done
-
-    if [[ $BUILD_DOCKER ]]; then
-        if [[ "${BUILD_ARCH}" == "" ]]; then
-            BUILD_ARCH=x64
-        fi
-
-        if [ -t 1 ]; then DOCKER_TTY='ti'; else DOCKER_TTY='i'; fi
-
-        USER_ID=$(id -u ${USER})
-        if [[ $USER_ID == 0 ]]; then
-            docker run -${DOCKER_TTY} --rm -v ${WORK_ROOT}:${WORK_ROOT} fibjs/${BUILD_DOCKER}-build-env:${BUILD_ARCH} \
-                bash -c "cd ${WORK_ROOT} && bash build ${args}"
-        else
-            docker run -${DOCKER_TTY} --rm -v ${WORK_ROOT}:${WORK_ROOT} fibjs/${BUILD_DOCKER}-build-env:${BUILD_ARCH} \
-                bash -c "cd ${WORK_ROOT} && bash /usr/build_user.sh ${USER} ${USER_ID} && sudo -E -u ${USER} bash build ${args}"
-        fi
-        exit $?
+    if [[ "$(basename "${VENDER_ROOT}")" == "vender" ]]; then
+        WORK_ROOT="$(dirname "${VENDER_ROOT}")"
+    else
+        WORK_ROOT="$(cd "$(dirname "$0")" && pwd)"
     fi
+    export WORK_ROOT
+    FRESH_WORK_ROOT=1
+fi
+
+# Target platform and architecture, plus the docker dispatch.  This does not
+# depend on how WORK_ROOT was determined: an entry script may preset it (the
+# build_tools self test does), and a cross build must still enter the image.
+args=$@
+
+for i in $@; do
+    case $i in
+    ia32 | x64 | arm | arm64 | mips64 | ppc64 | s390x | riscv64 | loong64 | loong64ow)
+        BUILD_ARCH=$i
+        ;;
+    linux | alpine | android)
+        BUILD_DOCKER=$i
+        args="${args/$BUILD_DOCKER/}"
+        ;;
+    esac
+done
+
+if [[ $BUILD_DOCKER ]]; then
+    if [[ "${BUILD_ARCH}" == "" ]]; then
+        BUILD_ARCH=x64
+    fi
+
+    if [ -t 1 ]; then DOCKER_TTY='ti'; else DOCKER_TTY='i'; fi
+
+    USER_ID=$(id -u ${USER})
+    # Pass the layout environment into the container: inside it the paths
+    # cannot always be re-derived (build_tools may be the repository root).
+    DOCKER_ENV="-e VENDER_ROOT=${VENDER_ROOT} -e WORK_ROOT=${WORK_ROOT} -e BUILD_ENTRY=${BUILD_ENTRY:-${VENDER_ROOT}} -e EXTRA_DEPS_DIR=${EXTRA_DEPS_DIR}"
+    if [[ $USER_ID == 0 ]]; then
+        docker run -${DOCKER_TTY} --rm -v ${WORK_ROOT}:${WORK_ROOT} ${DOCKER_ENV} fibjs/${BUILD_DOCKER}-build-env:${BUILD_ARCH} \
+            bash -c "cd ${BUILD_ENTRY:-${VENDER_ROOT}} && bash build ${args}"
+    else
+        docker run -${DOCKER_TTY} --rm -v ${WORK_ROOT}:${WORK_ROOT} ${DOCKER_ENV} fibjs/${BUILD_DOCKER}-build-env:${BUILD_ARCH} \
+            bash -c "cd ${BUILD_ENTRY:-${VENDER_ROOT}} && bash /usr/build_user.sh ${USER} ${USER_ID} && sudo -E -u ${USER} bash build ${args}"
+    fi
+    exit $?
+fi
+
+if [[ "${FRESH_WORK_ROOT}" == "1" ]]; then
 
     TEMP_DIR=${WORK_ROOT}/out
     if [ ! -e "${TEMP_DIR}" ]; then
@@ -351,13 +376,48 @@ if [[ "$WORK_ROOT" == "" ]]; then
     fi
 
     if [[ $CC == "" ]]; then
+        # Dependencies of this repository, plus the ones the entry point adds
+        # through EXTRA_DEPS_DIR (fibjs needs e.g. the GTK headers).  Both lists
+        # are merged, so the check runs once.
+        merge_deps() {
+            local out="$1"
+            shift
+            local f
+
+            : > "${out}"
+            for f in "$@"; do
+                if [[ -n "${f}" && -f "${f}" ]]; then
+                    cat "${f}" >> "${out}"
+                fi
+            done
+
+            # the same dependency is listed by more than one repository
+            if [[ -s "${out}" ]]; then
+                sort -u "${out}" -o "${out}"
+            fi
+        }
+
+        # The checker copies the file it is given into TEMP_DIR, so keep the
+        # merged list somewhere else.
+        DEPS_DIR="${WORK_ROOT}/out/deps"
+        mkdir -p "${DEPS_DIR}"
+
         if [[ $OS == "Darwin" ]]; then
-            ensure_brew_packages "${WORK_ROOT}/tools/darwin_deps"
+            merge_deps "${DEPS_DIR}/darwin_deps" "${VENDER_ROOT}/tools/darwin_deps" "${WORK_ROOT}/tools/darwin_deps" "${EXTRA_DEPS_DIR}/darwin_deps"
+            if [[ -s "${DEPS_DIR}/darwin_deps" ]]; then
+                ensure_brew_packages "${DEPS_DIR}/darwin_deps"
+            fi
         elif [[ $OS == "Linux" ]]; then
             if [[ $NAME =~ "Ubuntu" ]] || [[ $NAME =~ "Debian" ]]; then
-                ensure_apt_packages "${WORK_ROOT}/tools/ubuntu_deps"
+                merge_deps "${DEPS_DIR}/ubuntu_deps" "${VENDER_ROOT}/tools/ubuntu_deps" "${WORK_ROOT}/tools/ubuntu_deps" "${EXTRA_DEPS_DIR}/ubuntu_deps"
+                if [[ -s "${DEPS_DIR}/ubuntu_deps" ]]; then
+                    ensure_apt_packages "${DEPS_DIR}/ubuntu_deps"
+                fi
             elif [[ $NAME =~ "CentOS" ]] || [[ $NAME =~ "Fedora" ]]; then
-                ensure_yum_packages "${WORK_ROOT}/tools/centos_deps"
+                merge_deps "${DEPS_DIR}/centos_deps" "${VENDER_ROOT}/tools/centos_deps" "${WORK_ROOT}/tools/centos_deps" "${EXTRA_DEPS_DIR}/centos_deps"
+                if [[ -s "${DEPS_DIR}/centos_deps" ]]; then
+                    ensure_yum_packages "${DEPS_DIR}/centos_deps"
+                fi
             fi
         fi
     fi

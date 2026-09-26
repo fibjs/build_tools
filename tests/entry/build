@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# Self test entry point: the same shape as the entry scripts of the real
+# repositories (vender/build, fibjs/build), so the self test exercises the whole
+# chain - build_env.sh (docker dispatch, dependency check) -> scripts/build.
+#
+#   bash build x64 release -j4              native build
+#   bash build arm64 linux release -j4      cross build in the build image
+#   bash build x64 android release -j4      android build in the build image
+#
+# The outputs land in <build_tools>/{out,bin} (both are git ignored).
+
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+
+cd "$(dirname "$0")" || exit 1
+
+# build_tools is the repository root here (not a "vender" submodule), so the
+# output root is stated explicitly; the container re-enters this directory.
+export VENDER_ROOT="${ROOT}"
+export WORK_ROOT="${ROOT}"
+export BUILD_ENTRY="$(pwd)"
+
+. "${ROOT}/scripts/build_env.sh"
+. "${ROOT}/scripts/build"

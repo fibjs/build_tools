@@ -1,15 +1,23 @@
 cmake_minimum_required(VERSION 3.10)
 
+# Directory of this file, captured at include time.  Inside the functions below
+# CMAKE_CURRENT_LIST_DIR refers to the *caller* (which is the top-level
+# CMakeLists.txt in the unified build), and CMAKE_CURRENT_FUNCTION_LIST_DIR
+# needs CMake 3.17 while this tree supports 3.10.
+set(FIBJS_BUILD_TOOLS_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}")
+
 function(check_glibc func next flag)
     set(vers 2.29 2.28 2.27 2.17 2.14 2.4 2.2.5 2.2 2.0)
 
     foreach(ver ${vers})
-        unset(HAVE_GLIB_C_${func} CACHE)
+        # One cache entry per (function, version): the descending probe has to
+        # look at every version, but repeated configures reuse the results
+        # instead of re-running the checks.
         check_c_source_compiles("void ${func}();
             __asm__(\".symver ${func},${func}@GLIBC_${ver}\");
-            int main(void){${func}();return 0;}" HAVE_GLIB_C_${func})
+            int main(void){${func}();return 0;}" HAVE_GLIB_C_${func}_${ver})
 
-        if(${HAVE_GLIB_C_${func}})
+        if(${HAVE_GLIB_C_${func}_${ver}})
             if("${next}" STREQUAL "no")
                 set(next yes)
             else()
@@ -28,6 +36,9 @@ function(config)
 	include(CheckIncludeFiles)
 	include(CheckCSourceCompiles)
     include(CheckCXXSourceCompiles)
+
+    # The probes are expected (and cached); keep the configure log readable.
+    set(CMAKE_REQUIRED_QUIET ON)
 
 	set(CMAKE_C_FLAGS "${flags} -lm")
 
@@ -48,6 +59,27 @@ function(config)
         check_glibc(log2 no GLIB_C_MATH2)
 
         check_glibc(fcntl yes GLIB_C_FCNTL)
+    endif()
+
+    # <compare> (C++20 three-way comparison) is missing on older libstdc++ /
+    # libc++; the libraries then get the bundled fallback header
+    # (see option_flags_clang.cmake).  Probed once here, not once per library.
+    #
+    # The directory is added *after* the probe on purpose: the fallback headers
+    # shadow the system ones, so a probe that ran with them in the include path
+    # would answer for the patch instead of the toolchain.  This directory (the
+    # tree root in the single project layout, the library directory when a
+    # library is configured on its own) is inherited by everything built below
+    # it.
+    if(NOT "${BUILD_OS}" STREQUAL "Windows")
+        include(CheckIncludeFileCXX)
+        set(CMAKE_REQUIRED_FLAGS "-std=gnu++20")
+        check_include_file_cxx(compare HAS_COMPARE)
+        unset(CMAKE_REQUIRED_FLAGS)
+
+        if(NOT HAS_COMPARE)
+            include_directories("${FIBJS_BUILD_TOOLS_CMAKE_DIR}/../patch/cxx20/10")
+        endif()
     endif()
 
     # Check C++20 standard library features using project configured flags
@@ -78,16 +110,43 @@ function(config)
         int main(void){int a[]={1,2,3};auto arr=std::to_array(a);return 0;}"
         HAVE_STD_TO_ARRAY)
 
-    configure_file(${CMAKE_CURRENT_LIST_DIR}/../tools/glibc_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/glibc_config.h)
-    configure_file(${CMAKE_CURRENT_LIST_DIR}/../tools/std_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/std_config.h)
+    configure_file(${FIBJS_BUILD_TOOLS_CMAKE_DIR}/../tools/glibc_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/glibc_config.h)
+    configure_file(${FIBJS_BUILD_TOOLS_CMAKE_DIR}/../tools/std_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/std_config.h)
     include_directories(${CMAKE_CURRENT_BINARY_DIR})
 endfunction()
 
-config()
+# Feature checks plus the generated configuration headers of this directory.
+function(fibjs_config_headers)
+    # The checks have to see the toolchain the libraries will be compiled with:
+    # a cross build carries its target triple and sysroot in these flags, and
+    # without them the probes would answer for the host toolchain (e.g. a
+    # <compare> that exists in the container's libstdc++ but not in the target's).
+    include(${FIBJS_BUILD_TOOLS_CMAKE_DIR}/option_flags.cmake)
 
-execute_process(WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    COMMAND git describe --tags --always
-    OUTPUT_VARIABLE GIT_INFO
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-configure_file(${CMAKE_CURRENT_LIST_DIR}/../tools/gitinfo.h.in ${CMAKE_CURRENT_BINARY_DIR}/gitinfo.h)
+    config()
+
+    execute_process(WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        COMMAND git describe --tags --always
+        OUTPUT_VARIABLE GIT_INFO
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    configure_file(${FIBJS_BUILD_TOOLS_CMAKE_DIR}/../tools/gitinfo.h.in ${CMAKE_CURRENT_BINARY_DIR}/gitinfo.h)
+endfunction()
+
+# Once per build tree: run the feature checks, generate glibc_config.h /
+# std_config.h / gitinfo.h and publish them through the fibjs_config interface
+# target.  Every library links fibjs_config (see Library.cmake), so the checks
+# and the git describe call happen once instead of once per library.
+#
+# A library configured on its own (no top-level project) falls back to its own
+# checks, see option.cmake.
+function(fibjs_config_target)
+    if(TARGET fibjs_config)
+        return()
+    endif()
+
+    fibjs_config_headers()
+
+    add_library(fibjs_config INTERFACE)
+    target_include_directories(fibjs_config INTERFACE "${CMAKE_CURRENT_BINARY_DIR}")
+endfunction()

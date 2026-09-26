@@ -59,20 +59,42 @@ if(NOT DEFINED link_flags)
     set(link_flags "")
 endif()
 
-if("${BUILD_ARCH}" STREQUAL "")
-    set(BUILD_ARCH ${HOST_ARCH})
-endif()
+# The base flags (target triple, sysroot includes, optimisation, C++ standard)
+# are applied in the directory scope that creates the targets, because cmake
+# variables are inherited by subdirectories but never travel back up:
+#
+#   * option_libs.cmake reads `link_flags` (static C++ runtime, target library
+#     path, macOS frameworks) in the scope of the library, and
+#   * CMAKE_CXX_STANDARD/CMAKE_CXX_FLAGS only reach the targets that are created
+#     in this directory or below it.
+#
+# The guard is deliberately a normal variable, not a CACHE variable: a cache
+# entry is visible in every directory of the tree, so only the first library
+# would have received the flags (and a stale entry would survive a reconfigure).
+# That is how the vender tree ended up compiling every library with the compiler
+# defaults - no -std=gnu++20 ("C++20 or later required" from v8), no cross
+# target triple/sysroot and no -static-libstdc++ at link time.
+#
+# The expensive part, the feature checks, still runs once per tree; see
+# option_config.cmake: fibjs_config_target().
+if(NOT DEFINED FIBJS_BASE_FLAGS_APPLIED)
+    set(FIBJS_BASE_FLAGS_APPLIED TRUE)
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-	include(${CMAKE_CURRENT_LIST_DIR}/option_flags_vc.cmake)
-else()
-	include(${CMAKE_CURRENT_LIST_DIR}/option_flags_clang.cmake)
-endif()
+    if("${BUILD_ARCH}" STREQUAL "")
+        set(BUILD_ARCH ${HOST_ARCH})
+    endif()
 
-if("${CMAKE_CXX_STANDARD}" STREQUAL "")
-    set(CMAKE_CXX_STANDARD 20)
+    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+        include(${CMAKE_CURRENT_LIST_DIR}/option_flags_vc.cmake)
+    else()
+        include(${CMAKE_CURRENT_LIST_DIR}/option_flags_clang.cmake)
+    endif()
+
+    if("${CMAKE_CXX_STANDARD}" STREQUAL "")
+        set(CMAKE_CXX_STANDARD 20)
+    endif()
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${flags}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flags} ${ccflags}")

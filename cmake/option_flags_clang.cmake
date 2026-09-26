@@ -252,12 +252,18 @@ elseif(${BUILD_TYPE} STREQUAL "debug")
 endif()
 
 if(NOT "${BUILD_OS}" STREQUAL "Windows")
-    include(CheckIncludeFileCXX)
-    set(CMAKE_REQUIRED_FLAGS "${flags}")
-    unset(HAS_COMPARE CACHE)
-    CHECK_INCLUDE_FILE_CXX(compare HAS_COMPARE)
-    unset(CMAKE_REQUIRED_FLAGS)
-    if(NOT HAS_COMPARE)
+    # HAS_COMPARE is probed once per build tree (option_config.cmake: config()),
+    # and config() adds the bundled fallback header directory when the toolchain
+    # has no usable <compare>.  A library that runs its own checks (no top level
+    # project, see option.cmake) picks the directory up from its own config()
+    # call, so only the result of an already executed probe is honoured here:
+    # this file is included *before* the probes run, and adding the directory
+    # unconditionally would make the fallback headers shadow the system ones -
+    # the probe would then answer for the patch instead of the toolchain, and a
+    # toolchain that has <compare> (libstdc++ 10, C++20 mode) would be compiled
+    # against the bundled <concepts>, which redefines what its own <type_traits>
+    # already provides.
+    if(DEFINED HAS_COMPARE AND NOT HAS_COMPARE)
         include_directories("${CMAKE_CURRENT_LIST_DIR}/../patch/cxx20/10")
     endif()
 endif()
