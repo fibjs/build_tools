@@ -73,6 +73,26 @@ see more configuration on
 - [examples/hello/build](./examples/hello/build) for bash
 - [examples/hello/build.cmd](./examples/hello/build.cmd) for windows cmd
 
+### Assembly sources
+
+CMake keeps one "extension -> language" map per configure, and it gives an
+extension to the language that was enabled last.  A build tree that enables more
+than one assembly language (for example `ASM_MASM` and `ASM_NASM`, as the
+vendored tree does on Windows) would therefore assemble the sources of a library
+with the assembler of another one.
+
+A library states the language its `.asm` sources are written in, and
+`cmake/Library.cmake` pins those sources with the `LANGUAGE` source property:
+
+- the library list of the repository (its `libs.cmake`) sets
+  `asm_language_<library>`, which keeps the statement with the library list
+  itself, or
+- a library sets `asm_language` for itself, before including
+  `cmake/Library.cmake`.
+
+Libraries that are not listed are assembled with the language of the extension,
+which is what a build tree with a single assembly language needs.
+
 ## Copyright
 
 [MIT](./LICENSE) License
