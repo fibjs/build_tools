@@ -13,17 +13,10 @@ set(libs
 )
 
 # The assembly probe: two assembly languages claim the .asm extension in one
-# build tree and the library list pins the language of the probe, which is what
-# the vendored tree does for v8, blst and openssl (see
+# build tree, and the library that owns assembly states its language itself (see
 # tests/entry/asmprobe/CMakeLists.txt).  Targets without an assembler for it
 # skip the probe and leave a marker, so it is listed here unconditionally.
 list(APPEND libs
     asmprobe
     asmsteal
 )
-
-if("${BUILD_OS}" STREQUAL "Windows")
-    set(asm_language_asmprobe ASM_MASM)
-else()
-    set(asm_language_asmprobe ASM)
-endif()

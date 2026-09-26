@@ -238,16 +238,10 @@ endif()
 
 set(DIST_DIRNAME "${BUILD_OS}_${BUILD_ARCH}_${BUILD_TYPE}")
 
-# The NASM assembler for the Windows targets of the tree lives in this
-# repository (tools/asm/nasm.exe), next to the other toolchain decisions, so a
-# library can enable ASM_NASM without carrying a copy of the tool.
-# -DCMAKE_ASM_NASM_COMPILER overrides it.  The arm64 targets are not covered
-# here: v8 drives its own armasm wrapper there and states it itself.
-if("${BUILD_OS}" STREQUAL "Windows" AND NOT "${BUILD_ARCH}" STREQUAL "arm64"
-    AND NOT DEFINED CMAKE_ASM_NASM_COMPILER)
-    set(CMAKE_ASM_NASM_COMPILER "${CMAKE_CURRENT_LIST_DIR}/../tools/asm/nasm.exe"
-        CACHE FILEPATH "assembler of the NASM language")
-endif()
+# The assembler of the NASM language slot for the Windows targets comes from
+# this repository; the rule and the tool are described in option_asm.cmake.
+include(${CMAKE_CURRENT_LIST_DIR}/option_asm.cmake)
+asm_compilers()
 
 if("${BUILD_JOBS}" STREQUAL "")
     ProcessorCount(CMAKE_HOST_SYSTEM_PROCESSOR_COUNT)

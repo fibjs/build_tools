@@ -81,17 +81,24 @@ than one assembly language (for example `ASM_MASM` and `ASM_NASM`, as the
 vendored tree does on Windows) would therefore assemble the sources of a library
 with the assembler of another one.
 
-A library states the language its `.asm` sources are written in, and
-`cmake/Library.cmake` pins those sources with the `LANGUAGE` source property:
+A library turns the language of its `.asm` sources on with
+`cmake/option_asm.cmake`'s `enable_asm_language()`, which enables the language
+and states that the sources of that library are written in it:
 
-- the library list of the repository (its `libs.cmake`) sets
-  `asm_language_<library>`, which keeps the statement with the library list
-  itself, or
-- a library sets `asm_language` for itself, before including
-  `cmake/Library.cmake`.
+```CMake
+include(<built_tool_path>/cmake/option_asm.cmake)
 
-Libraries that are not listed are assembled with the language of the extension,
-which is what a build tree with a single assembly language needs.
+enable_asm_language(ASM_MASM)   # or ASM_NASM, ASM, ...
+```
+
+`cmake/option_asm.cmake` then pins the `.asm` sources of that library to the
+language with the `LANGUAGE` source property.  A library that never enables an
+assembly language needs nothing, and a build tree with a single assembly
+language is assembled with the language of the extension as before.
+
+The NASM assembler of the Windows targets ships with this repository
+(`tools/asm/nasm.exe`) and is set by `cmake/config.cmake`, so the libraries do
+not carry copies of it.
 
 ## Copyright
 

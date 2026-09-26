@@ -7,6 +7,7 @@ if(CCACHE_FOUND)
 endif(CCACHE_FOUND)
 
 include(${CMAKE_CURRENT_LIST_DIR}/option_src.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/option_asm.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/option_flags.cmake)
 if(TARGET fibjs_config)
 	# The feature checks and the generated configuration headers are provided

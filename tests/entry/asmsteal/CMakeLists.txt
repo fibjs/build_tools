@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 # gives an extension to the assembly language that was enabled last, so this
 # library - which is added after asmprobe - decides how the .asm sources of the
 # tree are assembled.  asmprobe states its own language (libs.cmake:
-# asm_language_asmprobe), which is what keeps its source in its own assembler.
+# enable_asm_language()), which is what keeps its source in its own assembler.
 #
 # The language here is the one that is not used by the probe:
 #   Windows        ASM_NASM (nasm, tools/asm/nasm.exe of build_tools)

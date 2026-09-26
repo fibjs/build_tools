@@ -122,12 +122,13 @@ if [[ "${CASES}" == *entry* ]]; then
             annotate_log "${WORK}/entry.log"
             tail -25 "${WORK}/entry.log"
 
-            # A regression of the assembly language pin (cmake/Library.cmake,
-            # asm_language_<library>) shows up as an assembler error or as a
+            # A regression of the assembly language statement (the
+            # enable_asm_language() call of the library, applied by
+            # cmake/option_asm.cmake) shows up as an assembler error or as a
             # missing assembler rule, not as a plain compile failure; name it so
             # the annotation can be read without the raw log.
             if grep -qE "ASM-ATT|asmprobe" "${WORK}/entry.log"; then
-                echo "::error::the assembly language pin of tests/entry/asmprobe did not reach its sources (cmake/Library.cmake: asm_language_asmprobe)"
+                echo "::error::the assembly language of tests/entry/asmprobe did not reach its sources (cmake/option_asm.cmake, enable_asm_language)"
             fi
 
             fail "case C build"
