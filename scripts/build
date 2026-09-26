@@ -101,7 +101,7 @@ if [[ -f build.cmake ]]; then
         -DCLEAN_BUILD=${CLEAN_BUILD} \
         -DBUILD_JOBS=${BUILD_JOBS} \
         -DBUILD_WITH_MSVC=${BUILD_WITH_MSVC} \
-        -DFIBJS_BIN_DIR=${BIN_DIR} \
+        -DBT_BIN_DIR=${BIN_DIR} \
         -P build.cmake
     exit $?
 fi
@@ -143,7 +143,7 @@ if [[ "$(uname)" == MINGW* || "$(uname)" == MSYS* || "$(uname)" == CYGWIN* ]]; t
         -DBUILD_ARCH=${BUILD_ARCH} \
         -DBUILD_TYPE=${BUILD_TYPE} \
         -DBUILD_JOBS=${BUILD_JOBS} \
-        -DFIBJS_BIN_DIR=${BIN_DIR} \
+        -DBT_BIN_DIR=${BIN_DIR} \
         ${MSBUILD_BUILD_TARGET} \
         -A ${TargetArch} \
         "${extra_args[@]}" \
@@ -173,7 +173,7 @@ else
         -DBUILD_ARCH=${BUILD_ARCH} \
         -DBUILD_TYPE=${BUILD_TYPE} \
         -DBUILD_JOBS=${BUILD_JOBS} \
-        -DFIBJS_BIN_DIR=${BIN_DIR} \
+        -DBT_BIN_DIR=${BIN_DIR} \
         "${extra_args[@]}" \
         -S . -B "${BUILD_DIR}"
     if [ $? != 0 ]; then

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # ============================================================================
-# fibjs build configuration
+# build configuration of the repositories that use this tool
 #
 # Single place that computes the build environment.  It is included by the
 # top-level CMakeLists.txt (project mode) and by the build scripts through
@@ -15,16 +15,16 @@ cmake_minimum_required(VERSION 3.10)
 #                  loong64 | loong64ow | s390x  (default: host / compiler target)
 #   BUILD_TYPE     release | debug               (default: release)
 #   BUILD_JOBS     parallel jobs                 (default: host cpu count)
-#   FIBJS_BIN_DIR  output directory for libraries and executables
+#   BT_BIN_DIR  output directory for libraries and executables
 #                  (default: <build dir>/../bin/<OS>_<ARCH>_<TYPE>)
 #
 # Outputs:
 #   BUILD_OS, BUILD_ARCH, BUILD_TYPE, HOST_ARCH, DIST_DIRNAME, BUILD_JOBS,
-#   FIBJS_BIN_DIR
+#   BT_BIN_DIR
 # ============================================================================
 
-if(NOT DEFINED FIBJS_CONFIG_LOADED)
-set(FIBJS_CONFIG_LOADED 1)
+if(NOT DEFINED BT_CONFIG_LOADED)
+set(BT_CONFIG_LOADED 1)
 
 function(usechalk)
     string(ASCII 27 Esc)
@@ -259,19 +259,19 @@ set(ENV{CLICOLOR_FORCE} 1)
 #     <WORK_ROOT>/out/<DIST_DIRNAME>/   build tree (one subdirectory per target)
 #     <WORK_ROOT>/bin/<DIST_DIRNAME>/   artifacts
 #
-# FIBJS_BIN_DIR may be preset by the caller (script-mode driver or the
+# BT_BIN_DIR may be preset by the caller (script-mode driver or the
 # top-level project) when the build tree lives outside of the default layout.
 # ----------------------------------------------------------------------------
 
-if("${FIBJS_BIN_DIR}" STREQUAL "" AND NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
+if("${BT_BIN_DIR}" STREQUAL "" AND NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
     # project mode.  The default build tree is <work root>/out/<dist>, so the
     # artifacts belong to <work root>/bin/<dist>.  Callers that use a different
-    # -B location pass -DFIBJS_BIN_DIR explicitly (build_tools/scripts/build).
-    set(FIBJS_BIN_DIR "${CMAKE_BINARY_DIR}/../../bin/${DIST_DIRNAME}")
+    # -B location pass -DBT_BIN_DIR explicitly (build_tools/scripts/build).
+    set(BT_BIN_DIR "${CMAKE_BINARY_DIR}/../../bin/${DIST_DIRNAME}")
 endif()
 
-if(NOT "${FIBJS_BIN_DIR}" STREQUAL "")
-    get_filename_component(FIBJS_BIN_DIR "${FIBJS_BIN_DIR}" ABSOLUTE)
+if(NOT "${BT_BIN_DIR}" STREQUAL "")
+    get_filename_component(BT_BIN_DIR "${BT_BIN_DIR}" ABSOLUTE)
 endif()
 
 message("")
@@ -281,8 +281,8 @@ message("BUILD_OS is ${BUILD_OS}")
 message("BUILD_ARCH is ${BUILD_ARCH}")
 message("BUILD_TYPE is ${BUILD_TYPE}")
 message("BUILD_JOBS is ${BUILD_JOBS}")
-if(NOT "${FIBJS_BIN_DIR}" STREQUAL "")
-    message("FIBJS_BIN_DIR is ${FIBJS_BIN_DIR}")
+if(NOT "${BT_BIN_DIR}" STREQUAL "")
+    message("BT_BIN_DIR is ${BT_BIN_DIR}")
 endif()
 message("")
 

@@ -76,9 +76,9 @@ endif()
 # target triple/sysroot and no -static-libstdc++ at link time.
 #
 # The expensive part, the feature checks, still runs once per tree; see
-# option_config.cmake: fibjs_config_target().
-if(NOT DEFINED FIBJS_BASE_FLAGS_APPLIED)
-    set(FIBJS_BASE_FLAGS_APPLIED TRUE)
+# option_config.cmake: bt_config_target().
+if(NOT DEFINED BT_BASE_FLAGS_APPLIED)
+    set(BT_BASE_FLAGS_APPLIED TRUE)
 
     if("${BUILD_ARCH}" STREQUAL "")
         set(BUILD_ARCH ${HOST_ARCH})

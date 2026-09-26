@@ -134,8 +134,8 @@ if [[ "${CASES}" == *entry* ]]; then
             fail "case C build"
         }
 
-    ENTRY_BIN="$(grep -o 'FIBJS_BIN_DIR is .*' "${WORK}/entry.log" | tail -n 1 | sed 's/.* is //' | sed 's/\x1b\[[0-9;]*m//g' | tr -d '\r')"
-    [ -n "${ENTRY_BIN}" ] || { annotate_log "${WORK}/entry.log"; tail -25 "${WORK}/entry.log"; fail "case C: FIBJS_BIN_DIR not reported"; }
+    ENTRY_BIN="$(grep -o 'BT_BIN_DIR is .*' "${WORK}/entry.log" | tail -n 1 | sed 's/.* is //' | sed 's/\x1b\[[0-9;]*m//g' | tr -d '\r')"
+    [ -n "${ENTRY_BIN}" ] || { annotate_log "${WORK}/entry.log"; tail -25 "${WORK}/entry.log"; fail "case C: BT_BIN_DIR not reported"; }
 
     if ! ls "${ENTRY_BIN}" 2>/dev/null | grep -q "entrycheck"; then
         # Report what is actually there: the raw log is not readable without

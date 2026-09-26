@@ -8,12 +8,12 @@
 #include <string>
 
 #if defined(_MSVC_LANG)
-#define FIBJS_SELFTEST_STANDARD _MSVC_LANG
+#define SELFTEST_STANDARD _MSVC_LANG
 #else
-#define FIBJS_SELFTEST_STANDARD __cplusplus
+#define SELFTEST_STANDARD __cplusplus
 #endif
 
-#if FIBJS_SELFTEST_STANDARD < 202002L
+#if SELFTEST_STANDARD < 202002L
 #error "the C++20 standard of the tree did not reach this library (the base flags must reach every library of libs.cmake)"
 #endif
 

@@ -93,7 +93,7 @@ REM     script receives the same -D arguments as before
 REM ---------------------------------------------------------------------------
 
 if exist build.cmake (
-    cmake -DBUILD_ARCH=%BUILD_ARCH% -DBUILD_TYPE=%BUILD_TYPE% -DBUILD_OS=%BUILD_OS% -DCLEAN_BUILD=%CLEAN_BUILD% -DBUILD_JOBS=%BUILD_JOBS% -DBUILD_WITH_MSVC=%BUILD_WITH_MSVC% -DFIBJS_BIN_DIR=%BIN_DIR% -P build.cmake
+    cmake -DBUILD_ARCH=%BUILD_ARCH% -DBUILD_TYPE=%BUILD_TYPE% -DBUILD_OS=%BUILD_OS% -DCLEAN_BUILD=%CLEAN_BUILD% -DBUILD_JOBS=%BUILD_JOBS% -DBUILD_WITH_MSVC=%BUILD_WITH_MSVC% -DBT_BIN_DIR=%BIN_DIR% -P build.cmake
     goto finished
 )
 
@@ -111,7 +111,7 @@ if "%CLEAN_BUILD%"=="true" (
 
 if not exist "%BUILD_DIR%" mkdir "%BUILD_DIR%"
 
-cmake -Wno-author -DBUILD_OS=%BUILD_OS% -DBUILD_ARCH=%BUILD_ARCH% -DBUILD_TYPE=%BUILD_TYPE% -DBUILD_JOBS=%BUILD_JOBS% -DFIBJS_BIN_DIR=%BIN_DIR% %MSBUILD_BUILD_TARGET% -A %TargetArch% %BUILD_CMAKE_EXTRA_ARGS% -S . -B "%BUILD_DIR%"
+cmake -Wno-author -DBUILD_OS=%BUILD_OS% -DBUILD_ARCH=%BUILD_ARCH% -DBUILD_TYPE=%BUILD_TYPE% -DBUILD_JOBS=%BUILD_JOBS% -DBT_BIN_DIR=%BIN_DIR% %MSBUILD_BUILD_TARGET% -A %TargetArch% %BUILD_CMAKE_EXTRA_ARGS% -S . -B "%BUILD_DIR%"
 if ERRORLEVEL 1 goto finished
 
 cmake --build "%BUILD_DIR%" -j %BUILD_JOBS% --config %BUILD_TYPE% -- /nologo /verbosity:minimal /p:CL_MPcount=%BUILD_JOBS%

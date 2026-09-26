@@ -21,7 +21,7 @@ if("${BUILD_OS}" STREQUAL "Windows")
         # The report of the runner reads this marker (tests/run.sh): a skipped
         # probe must not be reported as a missing artifact.  It lands next to
         # the artifacts, which is the directory the runner already knows.
-        file(WRITE "${FIBJS_BIN_DIR}/asmprobe-skipped" "no MASM for the ${BUILD_ARCH} target\n")
+        file(WRITE "${BT_BIN_DIR}/asmprobe-skipped" "no MASM for the ${BUILD_ARCH} target\n")
         message(STATUS "asmprobe: skipped, no MASM for the ${BUILD_ARCH} target")
         return()
     endif()
@@ -32,7 +32,7 @@ else()
     enable_language(ASM)
 
     if(NOT "${CMAKE_ASM_COMPILER}" MATCHES "clang")
-        file(WRITE "${FIBJS_BIN_DIR}/asmprobe-skipped" "the assembler driver does not accept .asm\n")
+        file(WRITE "${BT_BIN_DIR}/asmprobe-skipped" "the assembler driver does not accept .asm\n")
         message(STATUS "asmprobe: skipped, the assembler driver does not accept .asm")
         return()
     endif()

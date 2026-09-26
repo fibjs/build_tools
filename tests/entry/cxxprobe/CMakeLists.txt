@@ -56,4 +56,4 @@ else()
 endif()
 
 target_compile_definitions(cxxprobe PRIVATE
-    FIBJS_SELFTEST_ARCH_ID_EXPECTED=${cxxprobe_arch_id})
+    SELFTEST_ARCH_ID_EXPECTED=${cxxprobe_arch_id})

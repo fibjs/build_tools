@@ -16,7 +16,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/../../cmake/config.cmake)
 project(entrycheck C CXX)
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../cmake/option_config.cmake)
-fibjs_config_target()
+bt_config_target()
 
 include(${CMAKE_CURRENT_LIST_DIR}/libs.cmake)
 

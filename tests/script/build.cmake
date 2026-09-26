@@ -10,16 +10,16 @@ include(${CMAKE_CURRENT_LIST_DIR}/../../cmake/config.cmake)
 
 get_filename_component(name ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 
-if("${FIBJS_BIN_DIR}" STREQUAL "")
-    set(FIBJS_BIN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin/${DIST_DIRNAME}")
+if("${BT_BIN_DIR}" STREQUAL "")
+    set(BT_BIN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin/${DIST_DIRNAME}")
 endif()
 
 # bin/<OS>_<ARCH>_<TYPE> always lives at <work root>/bin/...; the driver passes
-# FIBJS_BIN_DIR, so the work root can be derived from it.
-get_filename_component(WORK_ROOT "${FIBJS_BIN_DIR}/../.." ABSOLUTE)
+# BT_BIN_DIR, so the work root can be derived from it.
+get_filename_component(WORK_ROOT "${BT_BIN_DIR}/../.." ABSOLUTE)
 
 set(BUILD_DIR "${WORK_ROOT}/out/${DIST_DIRNAME}")
-set(BIN_DIR "${FIBJS_BIN_DIR}")
+set(BIN_DIR "${BT_BIN_DIR}")
 
 if("${CLEAN_BUILD}" STREQUAL "true")
     file(REMOVE_RECURSE "${WORK_ROOT}/out" "${WORK_ROOT}/bin")
@@ -34,7 +34,7 @@ execute_process(WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         -DBUILD_OS=${BUILD_OS}
         -DBUILD_JOBS=${BUILD_JOBS}
         -DBUILD_WITH_MSVC=${BUILD_WITH_MSVC}
-        -DFIBJS_BIN_DIR=${BIN_DIR}
+        -DBT_BIN_DIR=${BIN_DIR}
         -S "${CMAKE_CURRENT_SOURCE_DIR}"
         -B "${BUILD_DIR}"
     RESULT_VARIABLE STATUS)

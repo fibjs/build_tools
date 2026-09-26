@@ -9,11 +9,11 @@ endif(CCACHE_FOUND)
 include(${CMAKE_CURRENT_LIST_DIR}/option_src.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/option_asm.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/option_flags.cmake)
-if(TARGET fibjs_config)
+if(TARGET bt_config)
 	# The feature checks and the generated configuration headers are provided
-	# once by the top-level project (option_config.cmake: fibjs_config_target).
+	# once by the top-level project (option_config.cmake: bt_config_target).
 else()
 	include(${CMAKE_CURRENT_LIST_DIR}/option_config.cmake)
-	fibjs_config_headers()
+	bt_config_headers()
 endif()
 include(${CMAKE_CURRENT_LIST_DIR}/option_libs.cmake)

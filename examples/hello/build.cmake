@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 #
 #   cmake -DBUILD_ARCH=x64 -DBUILD_TYPE=release -DBUILD_JOBS=4 -P build.cmake
 #
-# Artifacts land in output/bin/<OS>_<ARCH>_<TYPE> (FIBJS_BIN_DIR).
+# Artifacts land in output/bin/<OS>_<ARCH>_<TYPE> (BT_BIN_DIR).
 
 include(ProcessorCount)
 
@@ -42,7 +42,7 @@ foreach(target "${EXAMPLE_DIR}" "${EXAMPLE_DIR}/test")
             -DBUILD_TYPE=${BUILD_TYPE}
             -DBUILD_JOBS=${BUILD_JOBS}
             -DBUILD_WITH_MSVC=${BUILD_WITH_MSVC}
-            -DFIBJS_BIN_DIR=${BIN_DIR}
+            -DBT_BIN_DIR=${BIN_DIR}
             -S "${target}"
             -B "${target_build_dir}"
         RESULT_VARIABLE STATUS

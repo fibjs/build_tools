@@ -21,17 +21,17 @@ All `<built_tool_path>` in codes refers to this project's root path.
 One CMake project per repository, configured and built in one pass:
 
 ```bash
-cmake -DBUILD_ARCH=x64 -DBUILD_TYPE=release -DFIBJS_BIN_DIR=$PWD/bin \
+cmake -DBUILD_ARCH=x64 -DBUILD_TYPE=release -DBT_BIN_DIR=$PWD/bin \
       -S . -B out/Linux_x64_release
 cmake --build out/Linux_x64_release -- -j8
 ```
 
 `cmake/config.cmake` detects the platform/architecture/type (overridable with
 `-DBUILD_OS`, `-DBUILD_ARCH`, `-DBUILD_TYPE`, `-DBUILD_JOBS`) and computes the
-artifact directory `FIBJS_BIN_DIR` (`bin/<OS>_<ARCH>_<TYPE>`).
+artifact directory `BT_BIN_DIR` (`bin/<OS>_<ARCH>_<TYPE>`).
 
 A top-level CMakeLists.txt adds the projects with `add_subdirectory` and calls
-`fibjs_config_target()` once for the whole tree (feature checks and the
+`bt_config_target()` once for the whole tree (feature checks and the
 generated `glibc_config.h` / `std_config.h` / `gitinfo.h`).
 
 > The historical script-mode driver (`cmake-scripts/get_env.cmake` with the

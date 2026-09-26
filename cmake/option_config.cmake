@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 # CMAKE_CURRENT_LIST_DIR refers to the *caller* (which is the top-level
 # CMakeLists.txt in the unified build), and CMAKE_CURRENT_FUNCTION_LIST_DIR
 # needs CMake 3.17 while this tree supports 3.10.
-set(FIBJS_BUILD_TOOLS_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}")
+set(BT_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
 function(check_glibc func next flag)
     set(vers 2.29 2.28 2.27 2.17 2.14 2.4 2.2.5 2.2 2.0)
@@ -78,7 +78,7 @@ function(config)
         unset(CMAKE_REQUIRED_FLAGS)
 
         if(NOT HAS_COMPARE)
-            include_directories("${FIBJS_BUILD_TOOLS_CMAKE_DIR}/../patch/cxx20/10")
+            include_directories("${BT_CMAKE_DIR}/../patch/cxx20/10")
         endif()
     endif()
 
@@ -110,18 +110,18 @@ function(config)
         int main(void){int a[]={1,2,3};auto arr=std::to_array(a);return 0;}"
         HAVE_STD_TO_ARRAY)
 
-    configure_file(${FIBJS_BUILD_TOOLS_CMAKE_DIR}/../tools/glibc_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/glibc_config.h)
-    configure_file(${FIBJS_BUILD_TOOLS_CMAKE_DIR}/../tools/std_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/std_config.h)
+    configure_file(${BT_CMAKE_DIR}/../tools/glibc_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/glibc_config.h)
+    configure_file(${BT_CMAKE_DIR}/../tools/std_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/std_config.h)
     include_directories(${CMAKE_CURRENT_BINARY_DIR})
 endfunction()
 
 # Feature checks plus the generated configuration headers of this directory.
-function(fibjs_config_headers)
+function(bt_config_headers)
     # The checks have to see the toolchain the libraries will be compiled with:
     # a cross build carries its target triple and sysroot in these flags, and
     # without them the probes would answer for the host toolchain (e.g. a
     # <compare> that exists in the container's libstdc++ but not in the target's).
-    include(${FIBJS_BUILD_TOOLS_CMAKE_DIR}/option_flags.cmake)
+    include(${BT_CMAKE_DIR}/option_flags.cmake)
 
     config()
 
@@ -130,23 +130,23 @@ function(fibjs_config_headers)
         OUTPUT_VARIABLE GIT_INFO
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-    configure_file(${FIBJS_BUILD_TOOLS_CMAKE_DIR}/../tools/gitinfo.h.in ${CMAKE_CURRENT_BINARY_DIR}/gitinfo.h)
+    configure_file(${BT_CMAKE_DIR}/../tools/gitinfo.h.in ${CMAKE_CURRENT_BINARY_DIR}/gitinfo.h)
 endfunction()
 
 # Once per build tree: run the feature checks, generate glibc_config.h /
-# std_config.h / gitinfo.h and publish them through the fibjs_config interface
-# target.  Every library links fibjs_config (see Library.cmake), so the checks
+# std_config.h / gitinfo.h and publish them through the bt_config interface
+# target.  Every library links bt_config (see Library.cmake), so the checks
 # and the git describe call happen once instead of once per library.
 #
 # A library configured on its own (no top-level project) falls back to its own
 # checks, see option.cmake.
-function(fibjs_config_target)
-    if(TARGET fibjs_config)
+function(bt_config_target)
+    if(TARGET bt_config)
         return()
     endif()
 
-    fibjs_config_headers()
+    bt_config_headers()
 
-    add_library(fibjs_config INTERFACE)
-    target_include_directories(fibjs_config INTERFACE "${CMAKE_CURRENT_BINARY_DIR}")
+    add_library(bt_config INTERFACE)
+    target_include_directories(bt_config INTERFACE "${CMAKE_CURRENT_BINARY_DIR}")
 endfunction()

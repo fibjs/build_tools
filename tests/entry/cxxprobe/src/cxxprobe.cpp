@@ -26,12 +26,12 @@
 #include <string>
 
 #if defined(_MSVC_LANG)
-#define FIBJS_SELFTEST_STANDARD _MSVC_LANG
+#define SELFTEST_STANDARD _MSVC_LANG
 #else
-#define FIBJS_SELFTEST_STANDARD __cplusplus
+#define SELFTEST_STANDARD __cplusplus
 #endif
 
-#if FIBJS_SELFTEST_STANDARD < 202002L
+#if SELFTEST_STANDARD < 202002L
 #error "the C++20 standard of the tree did not reach this library"
 #endif
 
@@ -41,37 +41,37 @@
 #endif
 #if defined(__cpp_lib_span) && __has_include(<span>)
 #include <span>
-#define FIBJS_SELFTEST_HAVE_SPAN 1
+#define SELFTEST_HAVE_SPAN 1
 #endif
 #endif
 
 /* The architecture the compiler emits code for.  The ids have to match the ones
  * cxxprobe/CMakeLists.txt assigns to BUILD_ARCH. */
 #if defined(_M_X64) || defined(__x86_64__)
-#define FIBJS_SELFTEST_ARCH_ID 1
+#define SELFTEST_ARCH_ID 1
 #elif defined(_M_IX86) || defined(__i386__)
-#define FIBJS_SELFTEST_ARCH_ID 2
+#define SELFTEST_ARCH_ID 2
 #elif defined(_M_ARM64) || defined(__aarch64__)
-#define FIBJS_SELFTEST_ARCH_ID 3
+#define SELFTEST_ARCH_ID 3
 #elif defined(_M_ARM) || defined(__arm__)
-#define FIBJS_SELFTEST_ARCH_ID 4
+#define SELFTEST_ARCH_ID 4
 #elif defined(__mips64)
-#define FIBJS_SELFTEST_ARCH_ID 5
+#define SELFTEST_ARCH_ID 5
 #elif defined(__powerpc64__) || defined(__ppc64__)
-#define FIBJS_SELFTEST_ARCH_ID 6
+#define SELFTEST_ARCH_ID 6
 #elif defined(__riscv) && __riscv_xlen == 64
-#define FIBJS_SELFTEST_ARCH_ID 7
+#define SELFTEST_ARCH_ID 7
 #elif defined(__loongarch64) || defined(__loongarch__)
-#define FIBJS_SELFTEST_ARCH_ID 8
+#define SELFTEST_ARCH_ID 8
 #else
-#define FIBJS_SELFTEST_ARCH_ID 0
+#define SELFTEST_ARCH_ID 0
 #endif
 
-#if !defined(FIBJS_SELFTEST_ARCH_ID_EXPECTED)
+#if !defined(SELFTEST_ARCH_ID_EXPECTED)
 #error "cxxprobe/CMakeLists.txt did not pass the architecture of this build"
 #endif
 
-#if FIBJS_SELFTEST_ARCH_ID != FIBJS_SELFTEST_ARCH_ID_EXPECTED
+#if SELFTEST_ARCH_ID != SELFTEST_ARCH_ID_EXPECTED
 #error "the build was asked for another architecture: the base flags, the target triple among them, did not reach this library"
 #endif
 
@@ -113,17 +113,17 @@ const char* cxxprobe_arch_name(int id)
 
 std::string cxxprobe_arch()
 {
-    return cxxprobe_arch_name(FIBJS_SELFTEST_ARCH_ID);
+    return cxxprobe_arch_name(SELFTEST_ARCH_ID);
 }
 
 std::string cxxprobe_expected_arch()
 {
-    return cxxprobe_arch_name(FIBJS_SELFTEST_ARCH_ID_EXPECTED);
+    return cxxprobe_arch_name(SELFTEST_ARCH_ID_EXPECTED);
 }
 
 std::string cxxprobe_standard()
 {
-    return std::to_string(FIBJS_SELFTEST_STANDARD);
+    return std::to_string(SELFTEST_STANDARD);
 }
 
 int cxxprobe_value()
@@ -134,7 +134,7 @@ int cxxprobe_value()
     if (!(low < high) || (low <=> high) != std::strong_ordering::less)
         return -1;
 
-#if defined(FIBJS_SELFTEST_HAVE_SPAN)
+#if defined(SELFTEST_HAVE_SPAN)
     int values[] = { 1, 2, 3 };
     /* The (iterator, count) constructor is the one the bundled fallback header
      * has as well. */
