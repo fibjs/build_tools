@@ -9,3 +9,5 @@
 *.css binary
 *.ai binary
 *.svg binary
+# The assembler of the Windows targets is a binary and must be stored as is.
+tools/asm/* binary

@@ -118,7 +118,20 @@ if [[ "${CASES}" == *entry* ]]; then
     fi
 
     ( cd "${ROOT}/tests/entry" && bash build "${ENTRY_ARGS[@]}" ) > "${WORK}/entry.log" 2>&1 \
-        || { annotate_log "${WORK}/entry.log"; tail -25 "${WORK}/entry.log"; fail "case C build"; }
+        || {
+            annotate_log "${WORK}/entry.log"
+            tail -25 "${WORK}/entry.log"
+
+            # A regression of the assembly language pin (cmake/Library.cmake,
+            # asm_language_<library>) shows up as an assembler error or as a
+            # missing assembler rule, not as a plain compile failure; name it so
+            # the annotation can be read without the raw log.
+            if grep -qE "ASM-ATT|ASM_NASM|nasm" "${WORK}/entry.log"; then
+                echo "::error::the assembly language pin of tests/entry/asmprobe did not reach its sources (cmake/Library.cmake: asm_language_asmprobe)"
+            fi
+
+            fail "case C build"
+        }
 
     ENTRY_BIN="$(grep -o 'FIBJS_BIN_DIR is .*' "${WORK}/entry.log" | tail -n 1 | sed 's/.* is //' | sed 's/\x1b\[[0-9;]*m//g' | tr -d '\r')"
     [ -n "${ENTRY_BIN}" ] || { annotate_log "${WORK}/entry.log"; tail -25 "${WORK}/entry.log"; fail "case C: FIBJS_BIN_DIR not reported"; }
@@ -161,10 +174,31 @@ if [[ "${CASES}" == *entry* ]]; then
         fail "case C: cxxprobe_test${EXE_SUFFIX} missing in ${ENTRY_BIN}"
     }
 
+    # The assembly probe (tests/entry/asmprobe): its .asm source is only
+    # assembled by the language stated in libs.cmake (asm_language_asmprobe),
+    # which is what a library of the vendored tree needs as well.
+    ASM_LIB="$(find_artifact "${ENTRY_BIN}" asmprobe)"
+    [ -n "${ASM_LIB}" ] || {
+        annotate_dir "${ENTRY_BIN}"
+        annotate_log "${WORK}/entry.log" 5
+        fail "case C: asmprobe library missing in ${ENTRY_BIN}"
+    }
+
+    ASM_TEST="${ENTRY_BIN}/asmprobe_test${EXE_SUFFIX}"
+    [ -f "${ASM_TEST}" ] || {
+        annotate_dir "${ENTRY_BIN}"
+        annotate_log "${WORK}/entry.log" 5
+        fail "case C: asmprobe_test${EXE_SUFFIX} missing in ${ENTRY_BIN}"
+    }
+
     if [ -n "${HOST_ARCH}" ] && [ "${ARCH}" = "${HOST_ARCH}" ] && [ -z "${TARGET}" ]; then
         "${CXX_TEST}" > "${WORK}/cxxprobe.log" 2>&1 \
             || { annotate_log "${WORK}/cxxprobe.log" 5; tail -5 "${WORK}/cxxprobe.log"; fail "case C: cxxprobe_test exited non-zero"; }
         cat "${WORK}/cxxprobe.log"
+
+        "${ASM_TEST}" > "${WORK}/asmprobe.log" 2>&1 \
+            || { annotate_log "${WORK}/asmprobe.log" 5; tail -5 "${WORK}/asmprobe.log"; fail "case C: asmprobe_test exited non-zero"; }
+        cat "${WORK}/asmprobe.log"
 
         # The platform link flags link the C++ runtime statically, and the build
         # images rely on it: their target root filesystems do not always ship
