@@ -3,9 +3,9 @@
  * only links when the assembler of the pinned language accepted that source.
  */
 
-int asmprobe_asm_value(void);
+extern const int asmprobe_asm_value;
 
 int asmprobe_value(void)
 {
-    return asmprobe_asm_value() + 1;
+    return asmprobe_asm_value + 1;
 }

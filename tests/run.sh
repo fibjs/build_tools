@@ -126,7 +126,7 @@ if [[ "${CASES}" == *entry* ]]; then
             # asm_language_<library>) shows up as an assembler error or as a
             # missing assembler rule, not as a plain compile failure; name it so
             # the annotation can be read without the raw log.
-            if grep -qE "ASM-ATT|ASM_NASM|nasm" "${WORK}/entry.log"; then
+            if grep -qE "ASM-ATT|asmprobe" "${WORK}/entry.log"; then
                 echo "::error::the assembly language pin of tests/entry/asmprobe did not reach its sources (cmake/Library.cmake: asm_language_asmprobe)"
             fi
 
@@ -176,29 +176,37 @@ if [[ "${CASES}" == *entry* ]]; then
 
     # The assembly probe (tests/entry/asmprobe): its .asm source is only
     # assembled by the language stated in libs.cmake (asm_language_asmprobe),
-    # which is what a library of the vendored tree needs as well.
-    ASM_LIB="$(find_artifact "${ENTRY_BIN}" asmprobe)"
-    [ -n "${ASM_LIB}" ] || {
-        annotate_dir "${ENTRY_BIN}"
-        annotate_log "${WORK}/entry.log" 5
-        fail "case C: asmprobe library missing in ${ENTRY_BIN}"
-    }
+    # which is what a library of the vendored tree needs as well.  Targets whose
+    # assembler cannot take the source (gcc drivers, Windows arm64) skip it and
+    # leave a marker for the report.
+    if [ -f "${ENTRY_BIN}/asmprobe-skipped" ]; then
+        echo "== case C: assembly probe skipped on this target: $(cat "${ENTRY_BIN}/asmprobe-skipped")"
+    else
+        ASM_LIB="$(find_artifact "${ENTRY_BIN}" asmprobe)"
+        [ -n "${ASM_LIB}" ] || {
+            annotate_dir "${ENTRY_BIN}"
+            annotate_log "${WORK}/entry.log" 5
+            fail "case C: asmprobe library missing in ${ENTRY_BIN}"
+        }
 
-    ASM_TEST="${ENTRY_BIN}/asmprobe_test${EXE_SUFFIX}"
-    [ -f "${ASM_TEST}" ] || {
-        annotate_dir "${ENTRY_BIN}"
-        annotate_log "${WORK}/entry.log" 5
-        fail "case C: asmprobe_test${EXE_SUFFIX} missing in ${ENTRY_BIN}"
-    }
+        ASM_TEST="${ENTRY_BIN}/asmprobe_test${EXE_SUFFIX}"
+        [ -f "${ASM_TEST}" ] || {
+            annotate_dir "${ENTRY_BIN}"
+            annotate_log "${WORK}/entry.log" 5
+            fail "case C: asmprobe_test${EXE_SUFFIX} missing in ${ENTRY_BIN}"
+        }
+    fi
 
     if [ -n "${HOST_ARCH}" ] && [ "${ARCH}" = "${HOST_ARCH}" ] && [ -z "${TARGET}" ]; then
         "${CXX_TEST}" > "${WORK}/cxxprobe.log" 2>&1 \
             || { annotate_log "${WORK}/cxxprobe.log" 5; tail -5 "${WORK}/cxxprobe.log"; fail "case C: cxxprobe_test exited non-zero"; }
         cat "${WORK}/cxxprobe.log"
 
-        "${ASM_TEST}" > "${WORK}/asmprobe.log" 2>&1 \
-            || { annotate_log "${WORK}/asmprobe.log" 5; tail -5 "${WORK}/asmprobe.log"; fail "case C: asmprobe_test exited non-zero"; }
-        cat "${WORK}/asmprobe.log"
+        if [ -n "${ASM_TEST}" ] && [ -f "${ASM_TEST}" ]; then
+            "${ASM_TEST}" > "${WORK}/asmprobe.log" 2>&1 \
+                || { annotate_log "${WORK}/asmprobe.log" 5; tail -5 "${WORK}/asmprobe.log"; fail "case C: asmprobe_test exited non-zero"; }
+            cat "${WORK}/asmprobe.log"
+        fi
 
         # The platform link flags link the C++ runtime statically, and the build
         # images rely on it: their target root filesystems do not always ship
