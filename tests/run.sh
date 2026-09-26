@@ -7,8 +7,8 @@
 #
 #   case A  a single CMake project at the repository root (vender/fibjs layout),
 #           including cmake/Library.cmake and cmake/LibraryTest.cmake
-#   case B  a repository that drives its build from a script-mode build.cmake
-#           (addon layout, see fibjs/fib-addon)
+#   case B  the entry script of a repository (tests/entry), the layout every
+#           repository has: build_env.sh -> scripts/build -> the project
 #
 # It also checks that cmake-scripts/dist_dirname.cmake reports the same
 # distribution directory that the build scripts use.
@@ -72,7 +72,7 @@ case "$(uname)" in
 MINGW* | MSYS* | CYGWIN*) EXE_SUFFIX=".exe" ;;
 esac
 
-# A cross built binary can only be run inside the build image, so case C runs
+# A cross built binary can only be run inside the build image, so case B runs
 # the executable it built only when the build was for this machine.
 case "$(uname -m)" in
 x86_64 | amd64) HOST_ARCH=x64 ;;
@@ -82,7 +82,7 @@ armv7l | armv7) HOST_ARCH=arm ;;
 *) HOST_ARCH="" ;;
 esac
 
-# --- distribution directory name (script mode) -------------------------------
+# --- distribution directory name (helper script) -----------------------------
 HELPER_LOG="${WORK}/dist_dirname.log"
 DIST="$(cmake -DBUILD_ARCH="${ARCH}" -DBUILD_TYPE="${TYPE}" \
     -P "${ROOT}/cmake-scripts/dist_dirname.cmake" > "${HELPER_LOG}" 2>&1
@@ -99,19 +99,19 @@ case "${DIST}" in
 esac
 echo "== distribution directory: ${DIST}"
 
-# --- case C: entry script (the case the architecture matrix runs) ------------
-# The matrix always states a target, so only case C runs there; CASES asks for
-# the cases that drive the build scripts directly (project, script) as well.
+# --- case B: entry script (the case the architecture matrix runs) ------------
+# The matrix always states a target, so only case B runs there; CASES asks for
+# the case that drives the build script directly (project) as well.
 if [[ -z "${CASES}" ]]; then
     if [[ -n "${TARGET}" ]]; then
         CASES="entry"
     else
-        CASES="project script entry"
+        CASES="project entry"
     fi
 fi
 
 if [[ "${CASES}" == *entry* ]]; then
-    echo "== case C: entry script (arch=${ARCH} target=${TARGET:-native} type=${TYPE})"
+    echo "== case B: entry script (arch=${ARCH} target=${TARGET:-native} type=${TYPE})"
     ENTRY_ARGS=("${ARCH}" "${TYPE}" -j"${JOBS}")
     if [[ -n "${TARGET}" ]]; then
         ENTRY_ARGS=("${ARCH}" "${TARGET}" "${TYPE}" -j"${JOBS}")
@@ -131,11 +131,11 @@ if [[ "${CASES}" == *entry* ]]; then
                 echo "::error::the assembly language of tests/entry/asmprobe did not reach its sources (cmake/option_asm.cmake, enable_asm_language)"
             fi
 
-            fail "case C build"
+            fail "case B build"
         }
 
     ENTRY_BIN="$(grep -o 'BT_BIN_DIR is .*' "${WORK}/entry.log" | tail -n 1 | sed 's/.* is //' | sed 's/\x1b\[[0-9;]*m//g' | tr -d '\r')"
-    [ -n "${ENTRY_BIN}" ] || { annotate_log "${WORK}/entry.log"; tail -25 "${WORK}/entry.log"; fail "case C: BT_BIN_DIR not reported"; }
+    [ -n "${ENTRY_BIN}" ] || { annotate_log "${WORK}/entry.log"; tail -25 "${WORK}/entry.log"; fail "case B: BT_BIN_DIR not reported"; }
 
     if ! ls "${ENTRY_BIN}" 2>/dev/null | grep -q "entrycheck"; then
         # Report what is actually there: the raw log is not readable without
@@ -148,7 +148,7 @@ if [[ "${CASES}" == *entry* ]]; then
             echo "::error::${line}"
         done
         annotate_log "${WORK}/entry.log" 5
-        fail "case C: entrycheck missing in ${ENTRY_BIN}"
+        fail "case B: entrycheck missing in ${ENTRY_BIN}"
     fi
 
     # The C++ libraries of the entry repository carry the checks that a vender
@@ -158,21 +158,21 @@ if [[ "${CASES}" == *entry* ]]; then
     [ -n "${CXX_LIB}" ] || {
         annotate_dir "${ENTRY_BIN}"
         annotate_log "${WORK}/entry.log" 5
-        fail "case C: cxxprobe library missing in ${ENTRY_BIN}"
+        fail "case B: cxxprobe library missing in ${ENTRY_BIN}"
     }
 
     CXX_LIB2="$(find_artifact "${ENTRY_BIN}" cxxprobe2)"
     [ -n "${CXX_LIB2}" ] || {
         annotate_dir "${ENTRY_BIN}"
         annotate_log "${WORK}/entry.log" 5
-        fail "case C: cxxprobe2 library missing in ${ENTRY_BIN}"
+        fail "case B: cxxprobe2 library missing in ${ENTRY_BIN}"
     }
 
     CXX_TEST="${ENTRY_BIN}/cxxprobe_test${EXE_SUFFIX}"
     [ -f "${CXX_TEST}" ] || {
         annotate_dir "${ENTRY_BIN}"
         annotate_log "${WORK}/entry.log" 5
-        fail "case C: cxxprobe_test${EXE_SUFFIX} missing in ${ENTRY_BIN}"
+        fail "case B: cxxprobe_test${EXE_SUFFIX} missing in ${ENTRY_BIN}"
     }
 
     # The assembly probe (tests/entry/asmprobe): its .asm source is only
@@ -181,31 +181,31 @@ if [[ "${CASES}" == *entry* ]]; then
     # assembler cannot take the source (gcc drivers, Windows arm64) skip it and
     # leave a marker for the report.
     if [ -f "${ENTRY_BIN}/asmprobe-skipped" ]; then
-        echo "== case C: assembly probe skipped on this target: $(cat "${ENTRY_BIN}/asmprobe-skipped")"
+        echo "== case B: assembly probe skipped on this target: $(cat "${ENTRY_BIN}/asmprobe-skipped")"
     else
         ASM_LIB="$(find_artifact "${ENTRY_BIN}" asmprobe)"
         [ -n "${ASM_LIB}" ] || {
             annotate_dir "${ENTRY_BIN}"
             annotate_log "${WORK}/entry.log" 5
-            fail "case C: asmprobe library missing in ${ENTRY_BIN}"
+            fail "case B: asmprobe library missing in ${ENTRY_BIN}"
         }
 
         ASM_TEST="${ENTRY_BIN}/asmprobe_test${EXE_SUFFIX}"
         [ -f "${ASM_TEST}" ] || {
             annotate_dir "${ENTRY_BIN}"
             annotate_log "${WORK}/entry.log" 5
-            fail "case C: asmprobe_test${EXE_SUFFIX} missing in ${ENTRY_BIN}"
+            fail "case B: asmprobe_test${EXE_SUFFIX} missing in ${ENTRY_BIN}"
         }
     fi
 
     if [ -n "${HOST_ARCH}" ] && [ "${ARCH}" = "${HOST_ARCH}" ] && [ -z "${TARGET}" ]; then
         "${CXX_TEST}" > "${WORK}/cxxprobe.log" 2>&1 \
-            || { annotate_log "${WORK}/cxxprobe.log" 5; tail -5 "${WORK}/cxxprobe.log"; fail "case C: cxxprobe_test exited non-zero"; }
+            || { annotate_log "${WORK}/cxxprobe.log" 5; tail -5 "${WORK}/cxxprobe.log"; fail "case B: cxxprobe_test exited non-zero"; }
         cat "${WORK}/cxxprobe.log"
 
         if [ -n "${ASM_TEST}" ] && [ -f "${ASM_TEST}" ]; then
             "${ASM_TEST}" > "${WORK}/asmprobe.log" 2>&1 \
-                || { annotate_log "${WORK}/asmprobe.log" 5; tail -5 "${WORK}/asmprobe.log"; fail "case C: asmprobe_test exited non-zero"; }
+                || { annotate_log "${WORK}/asmprobe.log" 5; tail -5 "${WORK}/asmprobe.log"; fail "case B: asmprobe_test exited non-zero"; }
             cat "${WORK}/asmprobe.log"
         fi
 
@@ -219,14 +219,14 @@ if [[ "${CASES}" == *entry* ]]; then
                 readelf -d "${CXX_TEST}" | grep -E "NEEDED|libstdc" | while IFS= read -r line; do
                     echo "::error::${line}"
                 done
-                fail "case C: the platform link flags did not reach the executable"
+                fail "case B: the platform link flags did not reach the executable"
             fi
         fi
     fi
 fi
 
-# --- case A / B: driven directly, with the toolchain of the host --------------
-# (skipped for cross builds: those run through the entry script, case C)
+# --- case A: driven directly, with the toolchain of the host ------------------
+# (skipped for cross builds: those run through the entry script, case B)
 if [[ "${CASES}" == *project* ]]; then
 
 # --- case A: single CMake project --------------------------------------------
@@ -240,15 +240,6 @@ A_LIB="$(find_artifact "${A_BIN}" selfcheck)"
 [ -n "${A_LIB}" ] || { annotate_dir "${A_BIN}"; fail "case A: selfcheck library missing in ${A_BIN}"; }
 [ -f "${A_BIN}/selfcheck_test${EXE_SUFFIX}" ] || fail "case A: selfcheck_test${EXE_SUFFIX} missing in ${A_BIN}"
 "${A_BIN}/selfcheck_test${EXE_SUFFIX}" > /dev/null || fail "case A: selfcheck_test exited non-zero"
-
-# --- case B: script-mode repository (addon layout) ---------------------------
-echo "== case B: script-mode build.cmake repository"
-( cd "${ROOT}/tests/script" && WORK_ROOT="${WORK}/script" VENDER_ROOT="${ROOT}" \
-    bash "${ROOT}/scripts/build" "${ARCH}" "${TYPE}" -j"${JOBS}" ) > "${WORK}/script.log" 2>&1 \
-    || { annotate_log "${WORK}/script.log"; tail -25 "${WORK}/script.log"; fail "case B build"; }
-
-B_BIN="${WORK}/script/bin/${DIST}"
-ls "${B_BIN}" | grep -q "scriptcheck" || fail "case B: scriptcheck library missing in ${B_BIN}"
 
 fi # CASES project
 

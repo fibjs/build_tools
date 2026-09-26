@@ -1,56 +1,24 @@
 #!/bin/bash
+#
+# Entry script of the example: the same shape as the entry scripts of the real
+# repositories (vender/build, fibjs/build).  build_env.sh checks the
+# dependencies and dispatches a cross build into the build image, scripts/build
+# configures and builds the CMake project of this directory in one pass:
+#
+#   bash build x64 release -j4
+#
+# The outputs land in <example>/{out,bin}.
 
-usage()
-{
-	echo ""
-	echo "Usage: `basename $0` [options] [-jn] [-v] [-h]"
-	echo "Options:"
-	echo "  release, debug: "
-	echo "      Specifies the build type."
-	echo "  ia32, x64, arm, arm64, mips, mips64, ppc, ppc64:"
-	echo "      Specifies the architecture for code generation."
-	echo "  clean: "
-	echo "      Clean the build folder."
-	echo "  ci: "
-	echo "      Specifies the environment is CI."
-	echo "  -h, --help:"
-	echo "      Print this message and exit."
-	echo "  -j: enable make '-j' option."
-	echo "      if 'n' is not given, will set jobs to auto detected core count, otherwise n is used."
-    echo "  --use-msvc:"
-    echo "      force use msvc on Windows, default is clangcl."
-	echo ""
-}
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 
-for i in "$@"
-do
-    case $i in
-        ia32|x64|arm|arm64|armv6|mips|mips64|ppc|ppc64) BUILD_ARCH=$i
-            ;;
-        release|debug) BUILD_TYPE=$i
-            ;;
-        clean) CLEAN_BUILD="true"
-            ;;
-        ci) CI="ci"
-            ;;
-        -j*) BUILD_JOBS="${i#-j}"
-            ;;
-        --help|-h) usage
-            exit 1
-            ;;
-        --use-msvc)
-            BUILD_WITH_MSVC=true
-            ;;
-        *) echo "illegal option $i"
-            usage
-            exit 1
-            ;;
-    esac
-done
+cd "$(dirname "$0")" || exit 1
 
-cmake -DBUILD_ARCH=${BUILD_ARCH}\
-    -DBUILD_TYPE=${BUILD_TYPE}\
-    -DCLEAN_BUILD=${CLEAN_BUILD}\
-    -DBUILD_JOBS=${BUILD_JOBS}\
-    -DBUILD_WITH_MSVC=${BUILD_WITH_MSVC} \
-    -P build.cmake
+# build_tools is the repository root here (not a "vender" submodule), so the
+# checkout, the output root and the directory the build image re-enters are
+# stated explicitly.
+export VENDER_ROOT="${ROOT}"
+export WORK_ROOT="$(pwd)"
+export BUILD_ENTRY="$(pwd)"
+
+. "${ROOT}/scripts/build_env.sh"
+. "${ROOT}/scripts/build"

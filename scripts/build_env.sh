@@ -323,6 +323,11 @@ export VENDER_ROOT
 if [[ "$WORK_ROOT" == "" ]]; then
     if [[ "$(basename "${VENDER_ROOT}")" == "vender" ]]; then
         WORK_ROOT="$(dirname "${VENDER_ROOT}")"
+    elif [[ -n "${BUILD_ENTRY}" ]]; then
+        # A repository that does not carry the checkout as <root>/vender (the
+        # addon repositories) states where the build has to be started; that is
+        # the directory a build image re-enters as well.
+        WORK_ROOT="${BUILD_ENTRY}"
     else
         WORK_ROOT="$(cd "$(dirname "$0")" && pwd)"
     fi

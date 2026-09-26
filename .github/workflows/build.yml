@@ -97,9 +97,9 @@ jobs:
             target: android
             type: release
           # Without a target the entry script builds on the runner itself, and
-          # tests/run.sh then also drives the repositories of case A and case B
-          # (the layouts of vender/fibjs and of an addon repository), which the
-          # target based jobs skip: they only run the entry case.
+          # tests/run.sh then also drives the repository of case A (the layout
+          # of vender/fibjs), which the target based jobs skip: they only run
+          # the entry case.
           - os: ubuntu-latest
             arch: x64
             target: ''

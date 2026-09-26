@@ -82,21 +82,6 @@ set DIST_DIRNAME=%BUILD_OS%_%BUILD_ARCH%_%BUILD_TYPE%
 set BUILD_DIR=%WORK_ROOT%\out\%DIST_DIRNAME%
 set BIN_DIR=%WORK_ROOT%\bin\%DIST_DIRNAME%
 
-REM ---------------------------------------------------------------------------
-REM Two kinds of repositories are supported:
-REM
-REM   * a single CMake project at the repository root (vender, fibjs): configured
-REM     and built in one pass below
-REM   * a repository that drives its own build from a script-mode build.cmake
-REM     (addon repositories such as fib-jieba, via fib-addon/build.cmake): that
-REM     script receives the same -D arguments as before
-REM ---------------------------------------------------------------------------
-
-if exist build.cmake (
-    cmake -DBUILD_ARCH=%BUILD_ARCH% -DBUILD_TYPE=%BUILD_TYPE% -DBUILD_OS=%BUILD_OS% -DCLEAN_BUILD=%CLEAN_BUILD% -DBUILD_JOBS=%BUILD_JOBS% -DBUILD_WITH_MSVC=%BUILD_WITH_MSVC% -DBT_BIN_DIR=%BIN_DIR% -P build.cmake
-    goto finished
-)
-
 if "%BUILD_ARCH%"=="x64" set TargetArch=x64
 if "%BUILD_ARCH%"=="ia32" set TargetArch=Win32
 if "%BUILD_ARCH%"=="arm64" set TargetArch=ARM64

@@ -26,6 +26,19 @@ cmake_minimum_required(VERSION 3.10)
 if(NOT DEFINED BT_CONFIG_LOADED)
 set(BT_CONFIG_LOADED 1)
 
+# The environment has to be computed before the first project() call: project()
+# is what detects the compiler, and get_compiler.cmake below selects it (clang-18
+# on Linux, the cross compiler of the build image in a container).  A top-level
+# CMakeLists.txt without a literal project() call gets an implicit
+# project(Project) from CMake before anything else runs - which is the mistake
+# reported here, because it would detect the compiler of the host instead.
+if(DEFINED CMAKE_C_COMPILER_ID)
+    message(FATAL_ERROR
+        "config.cmake has to be included before the first project() call:\n"
+        "  the top-level CMakeLists.txt includes cmake/config.cmake and then\n"
+        "  calls project(), which detects the compiler selected here")
+endif()
+
 function(usechalk)
     string(ASCII 27 Esc)
     set(ChalkColorReset     "${Esc}[m"      PARENT_SCOPE)
@@ -259,8 +272,8 @@ set(ENV{CLICOLOR_FORCE} 1)
 #     <WORK_ROOT>/out/<DIST_DIRNAME>/   build tree (one subdirectory per target)
 #     <WORK_ROOT>/bin/<DIST_DIRNAME>/   artifacts
 #
-# BT_BIN_DIR may be preset by the caller (script-mode driver or the
-# top-level project) when the build tree lives outside of the default layout.
+# BT_BIN_DIR may be preset by the caller (the build driver or the top-level
+# project) when the build tree lives outside of the default layout.
 # ----------------------------------------------------------------------------
 
 if("${BT_BIN_DIR}" STREQUAL "" AND NOT DEFINED CMAKE_SCRIPT_MODE_FILE)

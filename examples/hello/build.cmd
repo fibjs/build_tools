@@ -1,74 +1,17 @@
 @echo off
 
-SETLOCAL ENABLEDELAYEDEXPANSION
+REM Entry script of the example (Windows): the same shape as the entry scripts of
+REM the real repositories (fibjs/build.cmd).  The shared driver configures and
+REM builds the CMake project of this directory in one pass:
+REM
+REM   build.cmd x64 release -j4
 
-set ARG_ERROR=no
+set SOURCE_ROOT=%~dp0
 
-for %%a in (%*) do (
-    set ARG_ERROR=yes
+cd /d "%SOURCE_ROOT%"
 
-    if "%%a"=="x64" (
-    	set BUILD_ARCH=x64
-        set ARG_ERROR=no
-    )
+set WORK_ROOT=%cd%
+set VENDER_ROOT=%SOURCE_ROOT%..\..
+set BUILD_ENTRY=%SOURCE_ROOT%
 
-    if "%%a"=="ia32" (
-    	set BUILD_ARCH=ia32
-        set ARG_ERROR=no
-    )
-
-    if "%%a"=="release" (
-    	set BUILD_TYPE=release
-        set ARG_ERROR=no
-    )
-
-    if "%%a"=="debug" (
-    	set BUILD_TYPE=debug
-        set ARG_ERROR=no
-    )
-
-    if "%%a"=="--use-msvc" (
-    	set BUILD_WITH_MSVC=1
-        set ARG_ERROR=no
-    )
-
-    if "%%a"=="clean" (
-    	set CLEAN_BUILD=true
-        set ARG_ERROR=no
-    )
-
-    if "%%a"=="-h" goto usage
-    if "%%a"=="--help" goto usage
-
-    if "!ARG_ERROR!"=="yes" (
-        echo illegal option "%%a"
-        goto usage
-    )
-)
-
-cmake -DBUILD_ARCH=%BUILD_ARCH% -DBUILD_TYPE=%BUILD_TYPE% -DBUILD_JOBS=%BUILD_JOBS% -DCLEAN_BUILD=%CLEAN_BUILD% -DBUILD_WITH_MSVC=%BUILD_WITH_MSVC% -P build.cmake
-
-goto finished
-
-:usage
-	echo.
-	echo Usage: `basename $0` [options] [-jn] [-v] [-h]
-	echo Options:
-	echo   release, debug: 
-	echo       Specifies the build type.
-	echo   ia32, x64, arm, arm64, mips, mips64, ppc, ppc64:
-	echo       Specifies the architecture for code generation.
-	echo   clean: 
-	echo       Clean the build folder.
-	echo   ci: 
-	echo       Specifies the environment is CI.
-	echo   -h, --help:
-	echo       Print this message and exit.
-	echo   -j: enable make '-j' option.
-	echo       if 'n' is not given, will set jobs to auto detected core count, otherwise n is used.
-	echo   --use-msvc:
-	echo       force use msvc on Windows, default is clangcl.
-	echo.
-    exit /B 1
-
-:finished
+call "%SOURCE_ROOT%..\..\scripts\build.cmd" %*

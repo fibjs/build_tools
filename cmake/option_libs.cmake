@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 
 # BIN_PATH is the shared artifact directory.  It is normally provided by
-# cmake/config.cmake (BT_BIN_DIR, derived from the build tree) or by the
-# script-mode driver (-DBT_BIN_DIR=<work root>/bin/<dist>).
+# cmake/config.cmake (BT_BIN_DIR, derived from the build tree) or by the build
+# driver (scripts/build, -DBT_BIN_DIR=<work root>/bin/<dist>).
 #
 # The fallback below keeps a directly configured single library working:
 # it assumes the historical <work root>/out/<dist>/<name> build tree.

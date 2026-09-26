@@ -86,26 +86,6 @@ case "${DIST_DIRNAME}" in
 esac
 
 BIN_DIR="${WORK_ROOT}/bin/${DIST_DIRNAME}"
-
-# Two kinds of repositories are supported:
-#
-#   * a single CMake project at the repository root (vender, fibjs): configured
-#     and built in one pass below
-#   * a repository that drives its own build from a script-mode build.cmake
-#     (addon repositories such as fib-jieba, via fib-addon/build.cmake): that
-#     script receives the same -D arguments as before
-if [[ -f build.cmake ]]; then
-    cmake -DBUILD_ARCH=${BUILD_ARCH} \
-        -DBUILD_TYPE=${BUILD_TYPE} \
-        -DBUILD_OS=${BUILD_OS} \
-        -DCLEAN_BUILD=${CLEAN_BUILD} \
-        -DBUILD_JOBS=${BUILD_JOBS} \
-        -DBUILD_WITH_MSVC=${BUILD_WITH_MSVC} \
-        -DBT_BIN_DIR=${BIN_DIR} \
-        -P build.cmake
-    exit $?
-fi
-
 BUILD_DIR="${WORK_ROOT}/out/${DIST_DIRNAME}"
 
 if [[ "${BUILD_JOBS}" == "" ]]; then
@@ -117,8 +97,6 @@ extra_args=()
 if [[ "${BUILD_CMAKE_EXTRA_ARGS}" != "" ]]; then
     IFS=' ' read -r -a extra_args <<< "${BUILD_CMAKE_EXTRA_ARGS}"
 fi
-
-BUILD_DIR="${WORK_ROOT}/out/${DIST_DIRNAME}"
 
 if [[ "${CLEAN_BUILD}" == "true" ]]; then
     rm -rf "${WORK_ROOT}/out" "${WORK_ROOT}/bin"

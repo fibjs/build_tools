@@ -35,7 +35,9 @@ A top-level CMakeLists.txt adds the projects with `add_subdirectory` and calls
 generated `glibc_config.h` / `std_config.h` / `gitinfo.h`).
 
 > The historical script-mode driver (`cmake-scripts/get_env.cmake` with the
-> `build()` function) was removed; builds are plain CMake projects now.
+> `build()` function, driven by a `build.cmake` at the repository root) was
+> removed; builds are plain CMake projects now.  A repository that used to
+> carry one (the addon repositories) builds by dropping the file.
 
 ### Create CMakeLists.txt
 
@@ -61,7 +63,8 @@ include(<built_tool_path>/cmake/LibraryTest.cmake)
 
 ### Run CMake
 
-The example driver configures and builds the project in one pass:
+The example is a repository of its own: its entry script hands the arguments to
+`scripts/build`, which configures and builds the project in one pass.
 
 ```bash
 cd examples/hello
