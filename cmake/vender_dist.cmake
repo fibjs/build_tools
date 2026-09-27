@@ -116,8 +116,14 @@ include(${BT_VENDER_DIR}/libs.cmake)
 
 foreach(lib ${libs})
     if(NOT TARGET ${lib})
+        set(imported_lib "${BT_BIN_DIR}/lib${lib}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+
+        if(NOT EXISTS "${imported_lib}")
+            set(imported_lib "${BT_BIN_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${lib}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+        endif()
+
         add_library(${lib} STATIC IMPORTED GLOBAL)
         set_target_properties(${lib} PROPERTIES
-            IMPORTED_LOCATION "${BT_BIN_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${lib}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+            IMPORTED_LOCATION "${imported_lib}")
     endif()
 endforeach()
