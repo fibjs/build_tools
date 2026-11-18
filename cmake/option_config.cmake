@@ -7,7 +7,10 @@ cmake_minimum_required(VERSION 3.10)
 set(BT_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
 function(check_glibc func next flag)
-    set(vers 2.29 2.28 2.27 2.17 2.14 2.4 2.2.5 2.2 2.0)
+    # 2.1 is the version i386 libm gives log2 (x86_64 starts at 2.2.5 and
+    # i386 gives exp/log/pow 2.0): without it the probe finds 2.29 first, no
+    # older version matches, and the generated GLIB_C_MATH2 stays undefined.
+    set(vers 2.29 2.28 2.27 2.17 2.14 2.4 2.2.5 2.2 2.1 2.0)
 
     foreach(ver ${vers})
         # One cache entry per (function, version): the descending probe has to
